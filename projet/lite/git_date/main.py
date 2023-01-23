@@ -44,8 +44,6 @@ def push_at_dates(day_ago: list):
         os.system("git add *")
         os.system(f"git commit --date=\"{d}\" -m \"update date.txt\"")
 
-    os.system("git push")
-
 if __name__ == "__main__":
     dates = parse(input("DATES: "))
     confirm = input(f"Are you sure you want to push at {dates} day ago? [Y/n] ")
