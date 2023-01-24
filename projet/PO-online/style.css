@@ -1,0 +1,19 @@
+body {
+    background-color: #0c0f1d;
+}
+a {
+    list-style-type: none ;
+    vertical-align:middle;
+    display: table-cell;                /* Transformation en block */
+    min-width: 120px; 
+    width: 120px;
+    height: 60px;
+    margin: 0.5rem;               /* Marges externes (1 valeurs = 4 directions) */
+    padding: 0.4rem 0;            /* Marges internes (2 valeurs = haut/bas et gauche/droite)*/
+    text-align: center;           /* Centrage du texte */
+    text-decoration: none;        /* Suppression du soulignement */
+    border: 1px solid #000000;       /* Ajout d'une bordure */
+    border-radius: 4px;        /* Ajout d'un angle arrondi */
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.5rem;
+}

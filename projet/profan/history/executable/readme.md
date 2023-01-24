@@ -1,0 +1,7 @@
+- code in `prog.c` (no include)
+- compile with `sh build.sh`
+- put free `HDD.bin` in `../file-system`
+- copy `prog.bin` in `../file-system/edit_folder/bin`
+- run `file-system.py` *(in windows thx loris)*
+- copy `HDD.bin` in profan dir
+- in profanOS run `cd bin` and `start prog.bin`

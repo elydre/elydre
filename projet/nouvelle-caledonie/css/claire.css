@@ -1,0 +1,85 @@
+h1 {
+    color: darkblue;
+    text-align: center;
+}
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+body {
+    background-color: ghostwhite;
+    color: navy;
+    font-family: Verdana;
+}
+.maintab {
+    background-color: aliceblue;
+    border: 1px solid darkblue;
+    width:70%;
+    height: 90vh;
+    margin: 0 auto;
+    vertical-align: top;
+    padding: 10px;
+}
+
+table,
+td {
+    border: 1px solid darkblue;
+}
+
+thead,
+tfoot {
+    background-color: #333;
+    color: #fff;
+}
+
+.menu {
+    display: flex;
+    padding:0;
+    justify-content: center;
+    background-color: ghostwhite;
+}
+.menu li {
+    list-style-type: none ;
+}
+
+.menu a {
+    display:block;
+    min-width: 120px;
+}
+
+.menu a {
+    display:block;
+    min-width: 120px;
+    
+    margin: 0.5rem;
+    padding: 0.4rem 0;
+    text-align: center; 
+    background-color: aliceblue;
+    color: navy;
+    text-decoration: none;
+    border: 1px solid darkblue;
+    border-radius: 4px;
+    transition: all 0.415s;
+}
+
+.menu a:hover {
+    background-color: darkblue;
+    color: white;
+    border-color: white;
+}
+
+input {
+    font-family: Verdana;
+
+    color: navy;
+    background-color: ghostwhite;
+    
+    min-width: 120px;
+    
+    margin: 0.5rem;
+    padding: 0.4rem 0;
+
+    border: 1px solid darkblue;
+    border-radius: 4px;
+}

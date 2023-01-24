@@ -1,0 +1,10 @@
+{
+    "a": "python3 /home/pi/bot/a.py",
+    "b": "python3 /home/pi/bot/b.py",
+    "c": "sh /home/pi/bot/c/c.sh",
+    "d": "python3 /home/pi/bot/d.py",
+    "f": "sh /home/pi/bot/f/f.sh",
+    "g": "python3 /home/pi/bot/g.py",
+    "1": "python3 /home/pi/Documents/ping_vinted.py",
+    "2": "python3 /home/pi/Documents/ph.py"
+}

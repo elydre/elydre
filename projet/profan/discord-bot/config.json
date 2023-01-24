@@ -1,0 +1,15 @@
+{
+    "token": "",
+    "cmd_role": 1011970637130104903,
+    "ping_role": 1012021182658252840,
+    "chan": {
+        "cmd": 1011963295516872775,
+        "release": 1011973895059951676,
+        "latest": 1011973895059951676,
+        "usr": 1012022285131055114
+    },
+    "url": {
+        "release": "https://esolangs.github.io/profanOS-build/main-releases.json",
+        "latest": "https://api.github.com/repos/esolangs/profanOS-build/contents/img"
+    }
+}

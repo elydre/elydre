@@ -1,0 +1,85 @@
+h1 {
+    color: lightsalmon;
+    text-align: center;
+}
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+body {
+    background-color: #12172b;
+    color: wheat;
+    font-family: Verdana;
+}
+.maintab {
+    background-color: #0c0f1d;
+    border: 1px solid lightsalmon;
+    width:70%;
+    height: 90vh;
+    margin: 0 auto;
+    vertical-align: top;
+    padding: 10px;
+}
+
+table,
+td {
+    border: 1px solid lightsalmon;
+}
+
+thead,
+tfoot {
+    background-color: #333;
+    color: #fff;
+}
+
+.menu {
+    display: flex;
+    padding:0;
+    justify-content: center;
+    background-color: #12172b;
+}
+.menu li {
+    list-style-type: none ;
+}
+
+.menu a {
+    display:block;
+    min-width: 120px;
+}
+
+.menu a {
+    display:block;
+    min-width: 120px;
+    
+    margin: 0.5rem;
+    padding: 0.4rem 0;
+    text-align: center; 
+    background-color: #0c0f1d;
+    color: wheat;
+    text-decoration: none;
+    border: 1px solid lightsalmon;
+    border-radius: 4px;
+    transition: all 0.415s;
+}
+
+.menu a:hover {
+    background-color: lightsalmon;
+    color: white;
+    border-color: white;
+}
+
+input {
+    font-family: Verdana;
+
+    color: wheat;
+    background-color: #12172b;
+    
+    min-width: 120px;
+    
+    margin: 0.5rem;
+    padding: 0.4rem 0;
+
+    border: 1px solid lightsalmon;
+    border-radius: 4px;
+}
