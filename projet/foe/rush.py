@@ -4,7 +4,6 @@ from math import floor
 import requests
 
 PL_NAME = "pf4"
-A_BOOST = 1
 
 RUSH = 1.9
 
@@ -32,27 +31,25 @@ gm_data = requests.get(f"https://api.foe-helper.com/v1/LegendaryBuilding/get?id=
 if gm_data["status"] == 200:
     total_fp = gm_data["response"]["total_fp"]
     fp_rwds = [r["forgepoints"] for r in gm_data["response"]["patron_bonus"]]
-    md_rwds = [r["medals"] for r in gm_data["response"]["patron_bonus"]]
-    bp_rwds = [r["blueprints"] for r in gm_data["response"]["patron_bonus"]]
 else:
     print(f"Error: status {gm_data['status']}")
     exit(1)
 
-print(f"{gm_name} ({key}) Level {gm_lvl} requires {total_fp} FP")
+print(f"{gm_name} ({key}) Level {gm_lvl} requires {total_fp} FP\n")
 
 pastable_buffer = f"{PL_NAME} {gm_name} [{gm_lvl - 1} -> {gm_lvl}]&"
 
 fp_rq = [floor(e * RUSH) or 1 for e in fp_rwds]
 
 for i in range(len(fp_rwds)):
-    print("P{} [{: >6}🎖️ | {: >3}📜 | {: >4}🪙 ] -> {: >4}🪙".format(
+    print("P{} [{: >4} => {: >4} ] safe with {} pf".format(
         i+1,
-        floor(md_rwds[i] * A_BOOST),
-        floor(bp_rwds[i] * A_BOOST),
-        floor(fp_rwds[i] * A_BOOST),
-        fp_rq[i]
+        fp_rwds[i],
+        fp_rq[i],
+        min(max(0, total_fp - floor(sum(fp_rq[:i+1]) + fp_rq[i])), sum(fp_rq) - 1)
     ))
+
     pastable_buffer = pastable_buffer.replace("&", f"& P{i+1}({fp_rq[i]})")
 
-print(pastable_buffer.replace("&", ""))
-print(total_fp - sum(fp_rq) - 1)
+print("\n|", pastable_buffer.replace("&", ""))
+print(f"| you need to add {total_fp - sum(fp_rq) - 1} FP to level up (+1)")
