@@ -46,7 +46,7 @@ for i in range(len(fp_rwds)):
         i+1,
         fp_rwds[i],
         fp_rq[i],
-        min(max(0, total_fp - floor(sum(fp_rq[:i+1]) + fp_rq[i])), sum(fp_rq) - 1)
+        min(max(0, total_fp - floor(sum(fp_rq[:i+1]) + fp_rq[i])), total_fp - sum(fp_rq) - 1)
     ))
 
     pastable_buffer = pastable_buffer.replace("&", f"& P{i+1}({fp_rq[i]})")
