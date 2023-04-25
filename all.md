@@ -2,7 +2,7 @@
 
 | projet                                                                     | date de création | codé en  | [dif10](http://pf4.ddns.net/dif10) | état                                             |
 |---------------------------------------------------------------------------------------|----------|-------|-------|-------------------------------------------------------------------------------|
-| [profanOS](https://github.com/elydre/profanOS)                                        | jul 2022 |c & asm| 7.5   | ![](https://img.shields.io/static/v1?label=&message=en%20dev&color=blue)      |
+| [profanOS](https://github.com/elydre/profanOS)                                        | jul 2022 |c & asm| 8     | ![](https://img.shields.io/static/v1?label=&message=en%20dev&color=blue)      |
 | [sefaga](https://github.com/elydre/sefaga)                                            | jun 2022 | py    | 4     | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
 | [ks2cpp](https://github.com/elydre/ks2cpp)                                            | jun 2022 | py    | 5.5   | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
 | [coral-models](https://github.com/elydre/coral-tflite-models)                         | may 2022 |py & tf| 2     | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
