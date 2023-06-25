@@ -10,7 +10,7 @@
         <img src="https://raw.githubusercontent.com/elydre/stats/master/generated/languages.svg" align="center"/>
     </a>
     <br><br>
-    <a href="https://pf4.ddns.net/discord">
+    <a href="http://pf4.ddns.net/discord">
         <img src="https://img.shields.io/discord/804096311975477279.svg?label=Discord&colorB=4F44D6&style=for-the-badge"/>
     </a>
     <a href="https://github.com/antonkomarev/github-profile-views-counter">
