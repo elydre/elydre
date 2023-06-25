@@ -26,7 +26,10 @@ gm_lvl = int(input("Level -> "))
 key = gm_keys[user_input]
 gm_name = gm_names[user_input]
 
-gm_data = requests.get(f"https://api.foe-helper.com/v1/LegendaryBuilding/get?id={key}&level={gm_lvl}").json()
+url = f"https://api.foe-helper.com/v1/LegendaryBuilding/get?id={key}&level={gm_lvl}"
+print(url)
+
+gm_data = requests.get(url).json()
 
 if gm_data["status"] == 200:
     total_fp = gm_data["response"]["total_fp"]
