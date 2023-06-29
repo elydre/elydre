@@ -100,7 +100,7 @@ int test_grille(int grille[9][9], int x, int y) {
     int g[9][9] = {0};
     int next_x = x + 1;
     int next_y = y;
-    
+
     if (chek_grille(grille, 1)) {
         print_sudoku(grille);
         return 1;

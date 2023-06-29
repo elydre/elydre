@@ -53,7 +53,7 @@ float cos(int deg);
 int main(int arg) {
 
     c_fskprint("Lancement du moteur 3d !\n");
-    
+
     Cube_t cube = Cube_t_init((Vertex3D_t) {0, 0, 0}, 100);
 
     rotate(cube, (Vertex3D_t) {0, 0, 1}, 135);
@@ -235,19 +235,19 @@ Cube_t Cube_t_init(Vertex3D_t position, float size) {
         {
             (Color_t) {255,0,0}, (Color_t) {255,0,0}, (Color_t) {255,0,0},
             (Color_t) {255,0,0}, (Color_t) {255,0,0}, (Color_t) {255,0,0},
-        
+
             (Color_t) {255,255,0}, (Color_t) {0,255,255}, (Color_t) {255,0,255},
             (Color_t) {255,255,0}, (Color_t) {255,0,255}, (Color_t) {0,255,0},
-        
+
             (Color_t) {0,0,255}, (Color_t) {0,0,255}, (Color_t) {0,0,255},
             (Color_t) {0,0,255}, (Color_t) {0,0,255}, (Color_t) {0,0,255},
-        
+
             (Color_t) {255,255,0}, (Color_t) {255,255,0}, (Color_t) {255,255,0},
             (Color_t) {255,255,0}, (Color_t) {255,255,0}, (Color_t) {255,255,0},
-        
+
             (Color_t) {255,0,255}, (Color_t) {255,0,255}, (Color_t) {255,0,255},
             (Color_t) {255,0,255}, (Color_t) {255,0,255}, (Color_t) {255,0,255},
-        
+
             (Color_t) {0,255,255}, (Color_t) {0,255,255}, (Color_t) {0,255,255},
             (Color_t) {0,255,255}, (Color_t) {0,255,255}, (Color_t) {0,255,255}
         },
