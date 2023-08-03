@@ -2,7 +2,7 @@
 
 | projet                                                                       | date de création | codé en  | [dif10](http://pf4.ddns.net/dif10) | état                                           |
 |---------------------------------------------------------------------------------------|----------|-------|-------|-------------------------------------------------------------------------------|
-| [42-pool](https://github.com/elydre/42-pool)                                          | jul 2023 | C     | 3.5   | ![](https://img.shields.io/static/v1?label=&message=en%20dev&color=blue)      |
+| [42-pool](https://github.com/elydre/42-pool)                                          | jul 2023 | C     | 3.5   | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
 | [olivine](https://github.com/elydre/profanOS/blob/main/zapps/fatpath/olivine.c)       | jun 2023 | C     | 4     | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
 | [mooz](https://github.com/elydre/mooz)                                                | may 2023 | C     | 3     | ![](https://img.shields.io/static/v1?label=&message=terminé&color=darkgreen)  |
 | [profanOS](https://github.com/elydre/profanOS)                                        | jul 2022 |C & asm| 8     | ![](https://img.shields.io/static/v1?label=&message=en%20dev&color=blue)      |
