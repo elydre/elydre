@@ -1,6 +1,6 @@
 # https://api.foe-helper.com/v1/LegendaryBuilding/get?id=X_ArcticFuture_Landmark2&level=54
 
-from math import floor
+from math import ceil
 import requests
 
 PL_NAME = "pf4"
@@ -42,14 +42,14 @@ print(f"{gm_name} ({key}) Level {gm_lvl} requires {total_fp} FP\n")
 
 pastable_buffer = f"{PL_NAME} {gm_name} [{gm_lvl - 1} -> {gm_lvl}]&"
 
-fp_rq = [floor(e * RUSH) or 1 for e in fp_rwds]
+fp_rq = [ceil(e * RUSH) or 1 for e in fp_rwds]
 
 for i in range(len(fp_rwds)):
     print("P{} [{: >4} => {: >4} ] safe with {} pf".format(
         i+1,
         fp_rwds[i],
         fp_rq[i],
-        min(max(0, total_fp - floor(sum(fp_rq[:i+1]) + fp_rq[i])), total_fp - sum(fp_rq) - 1)
+        min(max(0, total_fp - ceil(sum(fp_rq[:i+1]) + fp_rq[i])), total_fp - sum(fp_rq) - 1)
     ))
 
     pastable_buffer = pastable_buffer.replace("&", f"& P{i+1}({fp_rq[i]})")
