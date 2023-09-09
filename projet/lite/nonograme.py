@@ -1,3 +1,6 @@
+import random
+import time
+
 TOP  = 0
 LEFT = 1
 
@@ -224,17 +227,78 @@ class game:
 
         return False
 
+    def start_solve(self):
+        start = time.time()
+        success = self.rec_solve()
+        end = time.time()
+        print(f"-----\n{'SUCCESS' if success else 'FAIL'} in {end - start:.3f}s\n-----")
+
+def read_borders():
+    borders = []
+    while True:
+        try: borders.append(list(map(int, input().split("."))))
+        except: break
+    return borders
+
+def generate_random_borders(size):
+    cnt = [[CROSS for _ in range(size)] for __ in range(size)]
+    # draw lines in cnt randomly
+    for i in range(random.randint(0, size * size // 2)):
+        x = random.randint(0, size - 1)
+        y = random.randint(0, size - 1)
+        length = random.randint(1, size - max(x, y))
+        if random.randint(0, 1) == 0:
+            for j in range(length):
+                cnt[x + j][y] = DOT
+        else:
+            for j in range(length):
+                cnt[x][y + j] = DOT
+
+    # generate borders from cnt
+    borders = [[]]
+    for i in range(size):
+        old_was_dot = False
+        borders[TOP].append([])
+        for j in range(size):
+            if cnt[j][i] == DOT:
+                if old_was_dot:
+                    borders[TOP][-1][-1] += 1
+                else:
+                    borders[TOP][-1].append(1)
+                old_was_dot = True
+            else:
+                old_was_dot = False
+        if len(borders[TOP][-1]) == 0:
+            borders[TOP][-1].append([0])
+    
+    borders.append([])
+    for i in range(size):
+        old_was_dot = False
+        borders[LEFT].append([])
+        for j in range(size):
+            if cnt[i][j] == DOT:
+                if old_was_dot:
+                    borders[LEFT][-1][-1] += 1
+                else:
+                    borders[LEFT][-1].append(1)
+                old_was_dot = True
+            else:
+                old_was_dot = False
+        if len(borders[LEFT][-1]) == 0:
+            borders[LEFT][-1].append([0])
+    
+    finish = game(size = size, cnt = cnt, borders = borders)
+    finish.ascii_display()
+
+    return borders
 
 # plat = game(borders = [
-#     [[2], [3, 1], [2, 2], [10], [2, 2], [2, 2], [5, 4], [2, 2], [3, 1], [2]],
-#     [[1, 1], [1, 1], [1, 1], [8], [10], [2, 1, 2], [6], [8], [1, 1], [1, 1]]
+#     [[5], [1, 3], [1, 2, 3], [5, 3], [3, 4, 3], [4, 4, 3], [5, 2, 3], [5, 4], [7, 5], [14], [6, 6], [7], [11], [11], [9]],
+#     [[4], [8], [10], [11], [11], [11], [2, 2, 4], [1, 3, 2, 3], [1, 5, 2, 3], [1, 5, 2, 3], [1, 3, 3, 3], [2, 4, 2], [11], [9], [7]],
 # ])
 
-plat = game(borders = [
-    [[5], [1, 3], [1, 2, 3], [5, 3], [3, 4, 3], [4, 4, 3], [5, 2, 3], [5, 4], [7, 5], [14], [6, 6], [7], [11], [11], [9]],
-    [[4], [8], [10], [11], [11], [11], [2, 2, 4], [1, 3, 2, 3], [1, 5, 2, 3], [1, 5, 2, 3], [1, 3, 3, 3], [2, 4, 2], [11], [9], [7]],
-])
+plat = game(borders = generate_random_borders(15))
 
 plat.ascii_display()
-print(plat.rec_solve())
+plat.start_solve()
 plat.ascii_display()
