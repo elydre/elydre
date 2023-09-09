@@ -54,7 +54,9 @@ def is_valid_line(line, values):
     complet = not any([elem == EMPTY for elem in line])
     line_index = 0
     val_index = 0
+
     count = 0
+    lgood = False
     dot_i = -1
 
     while line_index < len(line):
@@ -66,13 +68,15 @@ def is_valid_line(line, values):
             count += 1
 
         elif line[line_index] == CROSS:
-            if count != 0 and count < val:
+            if (not lgood) and count != 0 and count < val:
                 return ISSUE
             count = 0
             dot_i = -1
 
         elif line[line_index] == EMPTY:
-            if count < val:
+            if lgood:
+                count = 0
+            elif count < val:
                 count += 1
 
         if count >= val:
@@ -81,13 +85,15 @@ def is_valid_line(line, values):
             elif count > val:
                 return ISSUE
 
+        lgood = False
+
         if count == val:
             val_index += 1
 
             if val_index == len(values):
                 break
 
-            count = 0
+            lgood = True
         line_index += 1
 
     # print(f"{line=}, {values=}, {line_index=}, {val_index=}, {count=}, {dot_i=}")
@@ -180,10 +186,23 @@ class game:
                 complet = False
 
         return SOLVED if complet else NO_ISSUE
-    
-    def rec_solve(self, i, j):
-        self.ascii_display()
 
+    def is_valid_fast(self, row, col):
+        # line
+        tmp = is_valid_line(self.cnt[row], self.borders[LEFT][row])
+        if tmp == ISSUE:
+            return ISSUE
+        complet = tmp == SOLVED
+
+        # column
+        tmp = is_valid_line([self.cnt[j][col] for j in range(self.size)], self.borders[TOP][col])
+        if tmp == ISSUE:
+            return ISSUE
+        complet = complet and tmp == SOLVED
+
+        return SOLVED if complet else NO_ISSUE
+
+    def rec_solve(self, i = 0, j = 0):
         if i == self.size:
             return self.is_valid() == SOLVED
 
@@ -194,16 +213,17 @@ class game:
             return self.rec_solve(i, j + 1)
 
         self.cnt[i][j] = CROSS
-        if self.is_valid() != ISSUE and self.rec_solve(i, j + 1):
+        if self.is_valid_fast(i, j) != ISSUE and self.rec_solve(i, j + 1):
             return True
 
         self.cnt[i][j] = DOT
-        if self.is_valid() != ISSUE and self.rec_solve(i, j + 1):
+        if self.is_valid_fast(i, j) != ISSUE and self.rec_solve(i, j + 1):
             return True
 
         self.cnt[i][j] = EMPTY
 
         return False
+
 
 # plat = game(borders = [
 #     [[2], [3, 1], [2, 2], [10], [2, 2], [2, 2], [5, 4], [2, 2], [3, 1], [2]],
@@ -216,7 +236,5 @@ plat = game(borders = [
 ])
 
 plat.ascii_display()
-print(plat.rec_solve(0, 0))
+print(plat.rec_solve())
 plat.ascii_display()
-
-# .1.5.2.3 ############[][][]####[]######
