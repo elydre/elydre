@@ -53,6 +53,4 @@ etat.refresh()
 
 *Bonne chance et amusé vous bien!*
 
-Mon serveur discord: https://discord.gg/PFbymQ3d97
-
-*-pf4*
+Mon serveur discord: [ici](https://discord.gg/PFbymQ3d97)
