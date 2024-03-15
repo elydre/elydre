@@ -81,7 +81,10 @@ def rename_album(dir_path):
                         return
                 if album_artist is None:
                     album_artist = audio['artist'][0].split(" - ")[0].split(",")[0].strip()
-                new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
+                try:    # multi track album
+                    new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
+                except: # one file album
+                    new_name = f"{album_artist} - {audio['album'][0]}"
                 new_name = tofilename(new_name) + ".flac"
                 full_path = os.path.join(dir_path, new_name)
                 track_count += 1
