@@ -64,6 +64,41 @@ def tofilename(s, is_dir=False):
 
     return s.strip()
 
+def get_track_year(date):
+    if date is None:
+        return None
+    if len(date) == 4 and date.isdigit():
+        return date
+    if len(date) == 10 and date[4] == "-" and date[7] == "-":
+        try:
+            year = date.split("-")[0]
+            if len(year) == 4 and year.isdigit():
+                return year
+        except:
+            pass
+    if len(date) == 10 and date[2] == "-" and date[5] == "-":
+        try:
+            year = date.split("-")[2]
+            if len(year) == 4 and year.isdigit():
+                return year
+        except:
+            pass
+
+    print(f"Error: invalid date format {date}")
+    input("Press Enter to continue...")
+    return None
+
+def update_date(audio):
+    if "date" in audio:
+        date = audio["date"][0]
+        year = get_track_year(date)
+        if year is not None and year != date:
+            print(f"    {date} -> {year}")
+            audio["date"] = year
+            audio.save()
+            return year
+    return None
+
 def rename_album(dir_path):
     global track_count, edit_count
     album_name = None
@@ -85,10 +120,13 @@ def rename_album(dir_path):
                     new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
                 except: # one file album
                     new_name = f"{album_artist} - {audio['album'][0]}"
+                new_year = update_date(audio)
                 new_name = tofilename(new_name) + ".flac"
                 full_path = os.path.join(dir_path, new_name)
                 track_count += 1
                 if full_path == path:
+                    if new_year is not None:
+                        edit_count += 1
                     continue
                 if os.path.exists(full_path):
                     print(f"Error: {full_path} already exists")
