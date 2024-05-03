@@ -10,12 +10,16 @@ def tofilename(s, is_dir=False):
     to_rep = [
         ["â", "a"],
         ["é", "e"],
+        ["è", "e"],
+        ["ê", "e"],
         ["î", "i"],
         ["ô", "o"],
         ["û", "u"],
+        ["ù", "u"],
 
         ["Â", "A"],
         ["É", "E"],
+        ["È", "E"],
         ["Î", "I"],
         ["Ô", "O"],
         ["Û", "U"],
@@ -58,6 +62,8 @@ def tofilename(s, is_dir=False):
     s = s.encode("ascii", "ignore").decode()
     if is_dir:
         s = s.replace(".", "")
+    else:
+        s = s[:4] + s[4:].replace(".", "")
 
     while "  " in s:
         s = s.replace("  ", " ")
