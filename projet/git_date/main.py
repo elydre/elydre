@@ -1,3 +1,4 @@
+from random import randint
 import os
 
 path = os.path.dirname(os.path.abspath(__file__))
@@ -40,7 +41,7 @@ def push_at_dates(day_ago: list):
         d = f"{ida} day ago"
         print(d)
         with open(f"{path}/date.txt", "w") as file:
-            file.write(d)
+            file.write(str(randint(0, 10000)))
         os.system("git add *")
         os.system(f"git commit --date=\"{d}\" -m \"update date.txt\"")
 
