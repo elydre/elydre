@@ -1,0 +1,62 @@
+body {
+    margin: 20px; /* Ajouter des marges autour du corps pour l'espacement général */
+    background-color: #2e2e2e; /* Couleur de fond pour le corps */
+    color: #b9b9b9 /* Couleur du texte */
+}
+
+b {
+    color: #dadada; /* Couleur du texte pour les balises <b> */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;    /* Uniformise la largeur des colonnes */
+    margin-top: 20px;       /* Ajouter une marge en haut pour espacement */
+}
+
+td {
+    /* border: 1px solid black; Ajoute les bordures */
+    text-align: center;     /* Centre le texte horizontalement */
+    vertical-align: top;    /* Aligne le texte en haut verticalement */
+    padding: 10px;          /* Ajoute du padding pour un meilleur rendu */
+    box-sizing: border-box; /* Inclut le padding et les bordures dans les dimensions */
+    position: relative;     /* Nécessaire pour le positionnement absolu des descriptions */
+}
+
+.image-container {
+    width: 100%;        /* Prend toute la largeur de la cellule */
+    padding-top: 100%;  /* Maintient le ratio 1:1 (carré) */
+    position: relative; /* Nécessaire pour le positionnement absolu de l'image */
+    overflow: hidden;   /* Cache les parties de l'image qui débordent */
+}
+
+.image-container img {
+    position: absolute; /* Positionner l'image absolument dans le conteneur */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* Coupe l'image pour remplir le carré sans déformation */
+}
+
+select {
+    width: 100%; /* Remplit la largeur du conteneur parent */
+    background: #1f1f1f; /* Couleur de fond pour le sélecteur */
+    border: 2px solid #181818; /* Ajoute une bordure */
+    color: #dadada; /* Couleur du texte */
+    padding: 7px; /* Espacement intérieur */
+}
+
+option:not(:checked) {
+    background-color: #fff;
+}
+
+button {
+    width: 100%; /* Remplit la largeur du conteneur parent */
+    background: #1f1f1f; /* Couleur de fond pour le bouton */
+    border: 2px solid #181818; /* Ajoute une bordure */
+    color: #dadada; /* Couleur du texte */
+    padding: 7px; /* Espacement intérieur */
+    cursor: pointer; /* Curseur de la souris en pointeur */
+}
