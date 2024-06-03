@@ -34,12 +34,22 @@ def get_image_url(url):
     return line[start:end].split(" ")[0]
 
 def download_image(url, source_url):
+    ext = url.split(".")[-1].lower()
+    if ext not in ["jpg", "jpeg", "png"]:
+        print("strange extension in", url)
+        ext = "jpg"
+    filename = os.path.join("img", source_url.split("/")[-1] + "." + ext)
+    
+    if os.path.exists(filename):
+        print("OK", filename)
+        return filename
+
+    print("DL", filename)
+    
     response = requests.get(url)
     if response.status_code != 200:
         print("Error", response.status_code)
         exit()
-
-    filename = os.path.join("img", source_url.split("/")[-1] + "." + url.split(".")[-1])
 
     with open(filename, 'wb') as f:
         f.write(response.content)
@@ -125,15 +135,15 @@ for line in lines:
     dico["wool"] = parse_wool(line[12])
     dico["url"] = line[14]
 
+    dico["image"] = None
     if dico["url"] and DOWNLOAD_IMAGES:
-        print("Downloading image for", dico["name"])
-        dico["image"] = download_image(get_image_url(dico["url"]), dico["url"])
-    else:
-        dico["image"] = None
+        if dico["url"].startswith("https://www.ravelry.com/patterns/library"):
+            dico["image"] = download_image(get_image_url(dico["url"]), dico["url"])
+        else:
+            print("other website", dico["url"])
 
     if dico["needles"] == -1:
         print("No needles found for", line)
-        exit()
 
     truc.append(dico)
 
