@@ -95,6 +95,7 @@ def download_image(source_url, author, name):
     # check if the image is already downloaded (extension can be everything)
     for file in files:
         if file.startswith(img_path):
+            g_stats["cache"] += 1
             return os.path.join(IMG_DIR, file)
 
     url = get_image_url(source_url)
@@ -108,10 +109,6 @@ def download_image(source_url, author, name):
         ext = "jpg"
 
     filename = os.path.join(IMG_DIR, img_path + ext)
-
-    if os.path.exists(filename):
-        g_stats["cache"] += 1
-        return filename
 
     response = requests.get(url)
     if response.status_code != 200:
