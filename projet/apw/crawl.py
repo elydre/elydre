@@ -1,8 +1,49 @@
+from _thread import start_new_thread
 import requests
 import json
 import os
 
 DOWNLOAD_IMAGES = True
+IMG_DIR = "img"
+
+###################################################
+#                                                 #
+#           CSV file reading functions            #
+#                                                 #
+###################################################
+
+def read_csv(file):
+    def humanize(word):
+        if word == "":
+            return None
+        while "  " in word:
+            word = word.replace("  ", " ")
+        return word.strip()
+
+    def parce_csv_line(line):
+        r = []
+        word = ""
+        in_quote = False
+        for c in line:
+            if c == '"':
+                in_quote = not in_quote
+            elif c == ',' and not in_quote:
+                r.append(humanize(word))
+                word = ""
+            else:
+                word += c
+        r.append(humanize(word))
+        return r
+
+    with open(file, 'r') as f:
+        lines = f.read().splitlines()
+    return [parce_csv_line(line) for line in lines]
+
+###################################################
+#                                                 #
+#      Image research and download functions      #
+#                                                 #
+###################################################
 
 def get_image_url(url):
     if url == "":
@@ -33,19 +74,23 @@ def get_image_url(url):
 
     return line[start:end].split(" ")[0]
 
-def download_image(url, source_url):
+def download_image(source_url):
+    url = get_image_url(source_url)
+
+    if url == None:
+        print("No image found")
+        exit()
+
     ext = url.split(".")[-1].lower()
     if ext not in ["jpg", "jpeg", "png"]:
         print("strange extension in", url)
         ext = "jpg"
-    filename = os.path.join("img", source_url.split("/")[-1] + "." + ext)
-    
+
+    filename = os.path.join(IMG_DIR, source_url.split("/")[-1] + "." + ext)
+
     if os.path.exists(filename):
-        print("OK", filename)
         return filename
 
-    print("DL", filename)
-    
     response = requests.get(url)
     if response.status_code != 200:
         print("Error", response.status_code)
@@ -56,32 +101,11 @@ def download_image(url, source_url):
 
     return filename
 
-def read_csv(file):
-    def humanize(word):
-        if word == "":
-            return None
-        while "  " in word:
-            word = word.replace("  ", " ")
-        return word.strip()
-
-    def parce_csv_line(line):
-        r = []
-        word = ""
-        in_quote = False
-        for c in line:
-            if c == '"':
-                in_quote = not in_quote
-            elif c == ',' and not in_quote:
-                r.append(humanize(word))
-                word = ""
-            else:
-                word += c
-        r.append(humanize(word))
-        return r
-
-    with open(file, 'r') as f:
-        lines = f.read().splitlines()
-    return [parce_csv_line(line) for line in lines]
+###################################################
+#                                                 #
+#            Data processing functions            #
+#                                                 #
+###################################################
 
 def get_needles(needles):
     if needles == None:
@@ -109,16 +133,17 @@ def parse_wool(wools):
         wools[j] = "".join(tmp)
     return wools
 
-lines = read_csv("src.csv")
-lines = lines[2:]
+###################################################
+#                                                 #
+#              Main parsing function              #
+#                                                 #
+###################################################
 
-truc = []
-
-for line in lines:
+def line_to_dico(line):
     dico = {}
 
     if line[0] == None:
-        continue
+        return None
 
     dico["author"] = line[0]
 
@@ -138,14 +163,50 @@ for line in lines:
     dico["image"] = None
     if dico["url"] and DOWNLOAD_IMAGES:
         if dico["url"].startswith("https://www.ravelry.com/patterns/library"):
-            dico["image"] = download_image(get_image_url(dico["url"]), dico["url"])
+            dico["image"] = download_image(dico["url"])
         else:
             print("other website", dico["url"])
 
     if dico["needles"] == -1:
         print("No needles found for", line)
 
-    truc.append(dico)
+    return dico
+
+global ended_threads
+ended_threads = 0
+
+def thread_line_to_dico(line):
+    global ended_threads
+
+    dico = line_to_dico(line)
+    if dico:
+        truc.append(dico)
+
+    ended_threads += 1
+
+###################################################
+#                                                 #
+#                  Main program                   #
+#                                                 #
+###################################################
+
+lines = read_csv("src.csv")
+lines = lines[2:]
+
+truc = []
+
+if DOWNLOAD_IMAGES and not os.path.exists(IMG_DIR):
+    os.makedirs(IMG_DIR)
+
+for line in lines:
+    start_new_thread(thread_line_to_dico, (line,))
+
+while ended_threads < len(lines):
+    pass
+
+# sort by author and name
+
+truc = sorted(truc, key=lambda x: (x["author"], x["name"]))
 
 print(len(truc))
 
