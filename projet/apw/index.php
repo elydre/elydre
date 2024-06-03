@@ -20,6 +20,33 @@
             }
             window.location.href = tmp_href;
         }
+
+        function getQueryParam(param) {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var selectedValue;
+
+            selectedValue = getQueryParam("needles");
+            if (selectedValue) {
+                var selectElement = document.getElementById("needles");
+                selectElement.value = selectedValue;
+            }
+
+            selectedValue = getQueryParam("type");
+            if (selectedValue) {
+                var selectElement = document.getElementById("type");
+                selectElement.value = selectedValue;
+            }
+
+            selectedValue = getQueryParam("wool");
+            if (selectedValue) {
+                var selectElement = document.getElementById("wool");
+                selectElement.value = selectedValue;
+            }
+        });
     </script>
     <body>
         <table><tbody>
