@@ -3,7 +3,6 @@ import requests
 import json
 import os
 
-DOWNLOAD_IMAGES = True
 IMG_DIR = "img"
 
 g_stats = {
@@ -52,7 +51,7 @@ def read_csv(file):
 #                                                 #
 ###################################################
 
-def get_image_url(url):
+def get_image_from_ravelry(url):
     response = requests.get(url)
     if response.status_code != 200:
         print("Error", response.status_code, "for", url)
@@ -98,7 +97,10 @@ def download_image(source_url, author, name):
             g_stats["cache"] += 1
             return os.path.join(IMG_DIR, file)
 
-    url = get_image_url(source_url)
+    if not source_url.startswith("https://www.ravelry.com/patterns/library"):
+        url = source_url
+    else:
+        url = get_image_from_ravelry(source_url)
 
     if url == None:
         return None
@@ -197,12 +199,14 @@ def line_to_dico(line):
     dico["wool"] = parse_wool(line[12])
     dico["url"] = line[14]
 
-    dico["image"] = None
-    if dico["url"] and DOWNLOAD_IMAGES:
+    dico["image"] = line[15]
+    if dico["image"]:
+        dico["image"] = download_image(dico["image"], dico["author"], dico["name"])
+    elif dico["url"]:
         if dico["url"].startswith("https://www.ravelry.com/patterns/library"):
             dico["image"] = download_image(dico["url"], dico["author"], dico["name"])
         else:
-            print("other website", dico["url"])
+            print("other website without image for", printable_line(line))
 
     if dico["needles"] == -1:
         print("No needles found for", printable_line(line))
@@ -234,7 +238,7 @@ lines = lines[2:]
 
 truc = []
 
-if DOWNLOAD_IMAGES and not os.path.exists(IMG_DIR):
+if not os.path.exists(IMG_DIR):
     os.makedirs(IMG_DIR)
 
 for line in lines:
