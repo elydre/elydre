@@ -6,6 +6,13 @@ import os
 DOWNLOAD_IMAGES = True
 IMG_DIR = "img"
 
+g_stats = {
+    "issues": 0,
+    "cache": 0,
+    "dl": 0,
+    "imgerr": 0,
+}
+
 ###################################################
 #                                                 #
 #           CSV file reading functions            #
@@ -50,8 +57,9 @@ def get_image_url(url):
         return None
     response = requests.get(url)
     if response.status_code != 200:
-        print("Error", response.status_code)
-        exit()
+        print("Error", response.status_code, "for", url)
+        g_stats["imgerr"] += 1
+        return None
 
     html = response.text.split("\n")
 
@@ -62,15 +70,18 @@ def get_image_url(url):
             line = html[i+1]
 
     if line is None:
-        print("No image found")
-        exit()
+        print("No image found in", url)
+        g_stats["imgerr"] += 1
+        return None
+        
 
     start = line.rfind("https://")
     end = line.find('"', start)
 
     if start == -1 or end == -1:
-        print("No image found")
-        exit()
+        print("No image found in", url)
+        g_stats["imgerr"] += 1
+        return None
 
     return line[start:end].split(" ")[0]
 
@@ -78,8 +89,7 @@ def download_image(source_url):
     url = get_image_url(source_url)
 
     if url == None:
-        print("No image found")
-        exit()
+        return None
 
     ext = url.split(".")[-1].lower()
     if ext not in ["jpg", "jpeg", "png"]:
@@ -89,16 +99,19 @@ def download_image(source_url):
     filename = os.path.join(IMG_DIR, source_url.split("/")[-1] + "." + ext)
 
     if os.path.exists(filename):
+        g_stats["cache"] += 1
         return filename
 
     response = requests.get(url)
     if response.status_code != 200:
-        print("Error", response.status_code)
-        exit()
+        print("Error", response.status_code, "for", url)
+        g_stats["imgerr"] += 1
+        return None
 
     with open(filename, 'wb') as f:
         f.write(response.content)
 
+    g_stats["dl"] += 1
     return filename
 
 ###################################################
@@ -155,6 +168,7 @@ def line_to_dico(line):
             break
     else:
         print("No name found for", printable_line(line))
+        g_stats["issues"] += 1
         return None
 
     dico["needles"] = get_needles(line[11])
@@ -167,10 +181,10 @@ def line_to_dico(line):
             dico["image"] = download_image(dico["url"])
         else:
             print("other website", dico["url"])
-            return None
 
     if dico["needles"] == -1:
         print("No needles found for", printable_line(line))
+        g_stats["issues"] += 1
         return None
 
     return dico
@@ -211,7 +225,14 @@ while ended_threads < len(lines):
 
 truc = sorted(truc, key=lambda x: (x["author"], x["name"]))
 
-print(len(truc))
+print("== End of processing ==")
+print(" Issues:     ", g_stats["issues"])
+print(" cached:     ", g_stats["cache"])
+print(" Downloaded: ", g_stats["dl"])
+print(" Web errors: ", g_stats["imgerr"])
+print(" Total:      ", len(truc))
+print("=======================")
+
 
 with open("data.json", "w") as f:
     json.dump(truc, f, indent=4)
