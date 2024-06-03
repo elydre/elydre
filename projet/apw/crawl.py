@@ -53,8 +53,6 @@ def read_csv(file):
 ###################################################
 
 def get_image_url(url):
-    if url == "":
-        return None
     response = requests.get(url)
     if response.status_code != 200:
         print("Error", response.status_code, "for", url)
@@ -85,7 +83,20 @@ def get_image_url(url):
 
     return line[start:end].split(" ")[0]
 
-def download_image(source_url):
+def download_image(source_url, author, name):
+    if not source_url:
+        return None
+
+    img_path = process_img_name(author) + "_" + process_img_name(name) + "."
+
+    # list all files in the directory
+    files = os.listdir(IMG_DIR)
+
+    # check if the image is already downloaded (extension can be everything)
+    for file in files:
+        if file.startswith(img_path):
+            return os.path.join(IMG_DIR, file)
+
     url = get_image_url(source_url)
 
     if url == None:
@@ -96,7 +107,7 @@ def download_image(source_url):
         print("strange extension in", url)
         ext = "jpg"
 
-    filename = os.path.join(IMG_DIR, source_url.split("/")[-1] + "." + ext)
+    filename = os.path.join(IMG_DIR, img_path + ext)
 
     if os.path.exists(filename):
         g_stats["cache"] += 1
@@ -146,6 +157,20 @@ def parse_wool(wools):
         wools[j] = "".join(tmp)
     return wools
 
+def process_img_name(str):
+    output = []
+    for c in str:
+        c = c.lower()
+        if c in "abcdefghijklmnopqrstuvwxyz":
+            output.append(c)
+        elif c in "0123456789":
+            output.append(c)
+        elif c == " ":
+            output.append("_")
+        else:
+            output.append(hex(ord(c))[2:])
+    return "".join(output)
+
 ###################################################
 #                                                 #
 #              Main parsing function              #
@@ -178,7 +203,7 @@ def line_to_dico(line):
     dico["image"] = None
     if dico["url"] and DOWNLOAD_IMAGES:
         if dico["url"].startswith("https://www.ravelry.com/patterns/library"):
-            dico["image"] = download_image(dico["url"])
+            dico["image"] = download_image(dico["url"], dico["author"], dico["name"])
         else:
             print("other website", dico["url"])
 
