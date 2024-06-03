@@ -113,7 +113,7 @@ if (!isset($_GET["type"])) {
 }
 
 if (!isset($_GET["wool"])) {
-    $_GET["wool"] = 0;
+    $_GET["wool"] = "0";
 }
 
 $needle = $_GET["needles"];
@@ -130,7 +130,7 @@ for ($i = 0; $i < count($json_data); $i++) {
     if ($json_data[$i]["type"] != $_GET["type"] && $_GET["type"] != 0) {
         continue;
     }
-    if ($_GET["wool"] != 0) {
+    if ($_GET["wool"] != "0") {
         if ($json_data[$i]["wool"] == null) {
             continue;
         }

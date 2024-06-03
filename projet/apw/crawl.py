@@ -140,6 +140,7 @@ def parse_wool(wools):
 ###################################################
 
 def line_to_dico(line):
+    printable_line = lambda x: "'" + " ".join([str(i) for i in x if i != None]) + "'"
     dico = {}
 
     if line[0] == None:
@@ -153,8 +154,8 @@ def line_to_dico(line):
             dico["type"] = i
             break
     else:
-        print("No name found for", line)
-        exit()
+        print("No name found for", printable_line(line))
+        return None
 
     dico["needles"] = get_needles(line[11])
     dico["wool"] = parse_wool(line[12])
@@ -166,9 +167,11 @@ def line_to_dico(line):
             dico["image"] = download_image(dico["url"])
         else:
             print("other website", dico["url"])
+            return None
 
     if dico["needles"] == -1:
-        print("No needles found for", line)
+        print("No needles found for", printable_line(line))
+        return None
 
     return dico
 
