@@ -11,12 +11,16 @@
             var needles = document.getElementById("needles").value;
             var type = document.getElementById("type").value;
             var wool = document.getElementById("wool").value;
+            var collec = document.getElementById("collec").value;
             var tmp_href = "?needles=" + needles;
             if (type != 0) {
                 tmp_href += "&type=" + type;
             }
             if (wool != 0) {
                 tmp_href += "&wool=" + wool;
+            }
+            if (collec != 0) {
+                tmp_href += "&collec=" + collec;
             }
             window.location.href = tmp_href;
         }
@@ -31,20 +35,22 @@
 
             selectedValue = getQueryParam("needles");
             if (selectedValue) {
-                var selectElement = document.getElementById("needles");
-                selectElement.value = selectedValue;
+                document.getElementById("needles").value = selectedValue;
             }
 
             selectedValue = getQueryParam("type");
             if (selectedValue) {
-                var selectElement = document.getElementById("type");
-                selectElement.value = selectedValue;
+                document.getElementById("type").value = selectedValue;
             }
 
             selectedValue = getQueryParam("wool");
             if (selectedValue) {
-                var selectElement = document.getElementById("wool");
-                selectElement.value = selectedValue;
+                document.getElementById("wool").value = selectedValue;
+            }
+
+            selectedValue = getQueryParam("collec");
+            if (selectedValue) {
+                document.getElementById("collec").value = selectedValue;
             }
         });
     </script>
@@ -117,14 +123,38 @@ for ($i = 0; $i < count($json_data); $i++) {
 sort($suggestion);
 
 foreach ($suggestion as $value) {
-    // replace underscores with spaces
-    $user_value = str_replace("_", " ", $value);
-    echo "<option value=\"$value\">$user_value</option>";
+    echo "<option value=\"$value\">" . str_replace("_", " ", $value) . "</option>";
 }
 
 ?>
                 </select>
             </td>
+            <td>
+                <select name="collec" id="collec">
+                    <option value="0">All Collections</option>
+                    <option value="1">Extra</option>
+<?php
+$suggestion = [];
+
+for ($i = 0; $i < count($json_data); $i++) {
+    if ($json_data[$i]["collec"] == null) {
+        continue;
+    }
+    for ($j = 0; $j < count($json_data[$i]["collec"]); $j++) {
+        if (!in_array($json_data[$i]["collec"][$j], $suggestion)) {
+            $suggestion[] = $json_data[$i]["collec"][$j];
+        }
+    }
+}
+
+sort($suggestion);
+
+foreach ($suggestion as $value) {
+    echo "<option value=\"$value\">" . str_replace("_", " ", $value) . "</option>";
+}
+
+?>
+                </select>
             <td>
             <button onclick="submitForm()">Search!</button>
             </td>
@@ -141,6 +171,10 @@ if (!isset($_GET["type"])) {
 
 if (!isset($_GET["wool"])) {
     $_GET["wool"] = "0";
+}
+
+if (!isset($_GET["collec"])) {
+    $_GET["collec"] = "0";
 }
 
 $needle = $_GET["needles"];
@@ -165,6 +199,16 @@ for ($i = 0; $i < count($json_data); $i++) {
             continue;
         }
     }
+    if ($_GET["collec"] != "0") {
+        if ($json_data[$i]["collec"] == null) {
+            if ($_GET["collec"] != "1") {
+                continue;
+            }
+        } else if (!in_array($_GET["collec"], $json_data[$i]["collec"])) {
+            continue;
+        }
+    }
+
     if ($count % $TAB_LINE_COUNT == 0 && $count != 0) {
         echo "</tr><tr>";
     }
@@ -185,7 +229,13 @@ for ($i = 0; $i < count($json_data); $i++) {
         echo "</a>";
     }
     echo "<b>" . $json_data[$i]["name"] . "</b><br>" . $json_data[$i]["author"];
-    echo " (" . $json_data[$i]["needles"] . ")</td>";
+    echo " (" . $json_data[$i]["needles"] . ")";
+    if ($json_data[$i]["collec"] != null) {
+        foreach ($json_data[$i]["collec"] as $value) {
+            echo "<br><a href=?collec=$value><i>" . str_replace("_", " ", $value) . "</i></a>";
+        }
+    }
+    echo "</td>";
 }
 
 // complete the table
