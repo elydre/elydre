@@ -1,5 +1,8 @@
 from _thread import start_new_thread
+from time import sleep
+
 import requests
+import random
 import json
 import os
 
@@ -10,6 +13,7 @@ g_stats = {
     "cache": 0,
     "dl": 0,
     "imgerr": 0,
+    "retries": 0
 }
 
 ###################################################
@@ -51,8 +55,17 @@ def read_csv(file):
 #                                                 #
 ###################################################
 
+def url_get_retry(url):
+    for i in range(5):
+        response = requests.get(url)
+        if response.status_code < 500:
+            break
+        g_stats["retries"] += 1
+        sleep(random.uniform(0.5, 1.5))
+    return response
+
 def get_image_from_ravelry(url):
-    response = requests.get(url)
+    response = url_get_retry(url)
     if response.status_code != 200:
         print("Error", response.status_code, "for", url)
         g_stats["imgerr"] += 1
@@ -112,7 +125,7 @@ def download_image(source_url, author, name):
 
     filename = os.path.join(IMG_DIR, img_path + ext)
 
-    response = requests.get(url)
+    response = url_get_retry(url)
     if response.status_code != 200:
         print("Error", response.status_code, "for", url)
         g_stats["imgerr"] += 1
@@ -255,6 +268,7 @@ print("== End of processing ==")
 print(" Issues:     ", g_stats["issues"])
 print(" cached:     ", g_stats["cache"])
 print(" Downloaded: ", g_stats["dl"])
+print(" Retries:    ", g_stats["retries"])
 print(" Web errors: ", g_stats["imgerr"])
 print(" Total:      ", len(truc))
 print("=======================")
