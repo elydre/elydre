@@ -1,9 +1,9 @@
 from _thread import start_new_thread
-from time import sleep
 
 import requests
 import random
 import json
+import time
 import os
 
 IMG_DIR = "img"
@@ -61,7 +61,7 @@ def url_get_retry(url):
         if response.status_code < 500:
             break
         g_stats["retries"] += 1
-        sleep(random.uniform(0.5, 1.5))
+        time.sleep(random.uniform(0.5, 1.5))
     return response
 
 def get_image_from_ravelry(url):
@@ -264,14 +264,21 @@ while ended_threads < len(lines):
 
 truc = sorted(truc, key=lambda x: (x["author"], x["name"]))
 
-print("== End of processing ==")
-print(" Issues:     ", g_stats["issues"])
-print(" cached:     ", g_stats["cache"])
-print(" Downloaded: ", g_stats["dl"])
-print(" Retries:    ", g_stats["retries"])
-print(" Web errors: ", g_stats["imgerr"])
-print(" Total:      ", len(truc))
-print("=======================")
+print(".-=== End of processing ===")
+print("|")
+print("| Day:        ", time.strftime("%d/%m/%Y"))
+print("| Time:       ", time.strftime("%H:%M:%S"))
+print("|")
+print("| cached:     ", g_stats["cache"])
+print("| Downloaded: ", g_stats["dl"])
+print("| Retries:    ", g_stats["retries"])
+print("|")
+print("| Issues:     ", g_stats["issues"])
+print("| Web errors: ", g_stats["imgerr"])
+print("|")
+print("| Total:      ", len(truc))
+print("|")
+print("'-=========================")
 
 
 with open("data.json", "w") as f:
