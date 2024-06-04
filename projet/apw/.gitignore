@@ -1,4 +1,9 @@
-data.json
-crawl.log
-src.csv
 img/
+
+src.csv
+
+types.json
+data.json
+
+crawl.log
+err.log

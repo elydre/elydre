@@ -61,27 +61,12 @@
                 <select name="needles" id="needles">
                     <option value="all">All Needles</option>
 <?php
-// Read the JSON file
-$json = file_get_contents("data.json");
 
 // Decode the JSON file
-$json_data = json_decode($json,true);
-
-$suggestion = [];
-
-for ($i = 0; $i < count($json_data); $i++) {
-    // check if $json_data[$i]["needles"] is in the array $suggestion
-    if (!in_array($json_data[$i]["needles"], $suggestion)) {
-        // if not, add it to the array
-        $suggestion[] = $json_data[$i]["needles"];
-    }
-}
-
-// sort the array
-sort($suggestion);
+$json_data = json_decode(file_get_contents("types.json"), true);
 
 // display the array
-foreach ($suggestion as $value) {
+foreach ($json_data["needles"] as $value) {
     echo "<option value=\"$value\">$value</option>";
 }
 
@@ -107,22 +92,8 @@ foreach ($suggestion as $value) {
                 <select name="wool" id="wool">
                     <option value="0">All Wools</option>
 <?php
-$suggestion = [];
 
-for ($i = 0; $i < count($json_data); $i++) {
-    if ($json_data[$i]["wool"] == null) {
-        continue;
-    }
-    for ($j = 0; $j < count($json_data[$i]["wool"]); $j++) {
-        if (!in_array($json_data[$i]["wool"][$j], $suggestion)) {
-            $suggestion[] = $json_data[$i]["wool"][$j];
-        }
-    }
-}
-
-sort($suggestion);
-
-foreach ($suggestion as $value) {
+foreach ($json_data["wools"] as $value) {
     echo "<option value=\"$value\">" . str_replace("_", " ", $value) . "</option>";
 }
 
@@ -134,22 +105,8 @@ foreach ($suggestion as $value) {
                     <option value="0">All Collections</option>
                     <option value="1">Extra</option>
 <?php
-$suggestion = [];
 
-for ($i = 0; $i < count($json_data); $i++) {
-    if ($json_data[$i]["collec"] == null) {
-        continue;
-    }
-    for ($j = 0; $j < count($json_data[$i]["collec"]); $j++) {
-        if (!in_array($json_data[$i]["collec"][$j], $suggestion)) {
-            $suggestion[] = $json_data[$i]["collec"][$j];
-        }
-    }
-}
-
-sort($suggestion);
-
-foreach ($suggestion as $value) {
+foreach ($json_data["collec"] as $value) {
     echo "<option value=\"$value\">" . str_replace("_", " ", $value) . "</option>";
 }
 
@@ -181,6 +138,9 @@ $needle = $_GET["needles"];
 
 $TAB_LINE_COUNT = 6; // const
 $count = 0;
+
+// Decode the JSON file
+$json_data = json_decode(file_get_contents("data.json"), true);
 
 echo "<table><tbody><tr>";
 
