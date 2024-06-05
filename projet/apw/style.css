@@ -1,11 +1,21 @@
 body {
-    margin: 20px; /* Ajouter des marges autour du corps pour l'espacement général */
+    margin: 20px;           /* Ajouter des marges autour du corps pour l'espacement général */
     background-color: #2e2e2e; /* Couleur de fond pour le corps */
-    color: #b9b9b9 /* Couleur du texte */
+    color: #b9b9b9        /* Couleur du texte */
 }
 
 b {
-    color: #dadada; /* Couleur du texte pour les balises <b> */
+    color: #dadada;      /* Couleur du texte pour les balises <b> */
+}
+
+i {
+    font-style: normal;     /* Désactive le style italique par défaut */
+    font-size: 0.8em;       /* Taille de police plus petite */
+    color: #8c8c8c;       /* Couleur du texte pour les balises <i> */
+}
+
+a {
+    text-decoration: none;  /* Supprime le soulignement par défaut */
 }
 
 table {
@@ -16,7 +26,6 @@ table {
 }
 
 td {
-    /* border: 1px solid black; Ajoute les bordures */
     text-align: center;     /* Centre le texte horizontalement */
     vertical-align: top;    /* Aligne le texte en haut verticalement */
     padding: 10px;          /* Ajoute du padding pour un meilleur rendu */
@@ -41,11 +50,11 @@ td {
 }
 
 select {
-    width: 100%; /* Remplit la largeur du conteneur parent */
+    width: 100%;        /* Remplit la largeur du conteneur parent */
     background: #1f1f1f; /* Couleur de fond pour le sélecteur */
     border: 2px solid #181818; /* Ajoute une bordure */
-    color: #dadada; /* Couleur du texte */
-    padding: 7px; /* Espacement intérieur */
+    color: #dadada;   /* Couleur du texte */
+    padding: 7px;       /* Espacement intérieur */
 }
 
 option:not(:checked) {

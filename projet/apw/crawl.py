@@ -4,6 +4,7 @@ import requests
 import random
 import json
 import time
+import re
 import os
 
 IMG_DIR = "img"
@@ -143,6 +144,11 @@ def download_image(source_url, author, name):
 #                                                 #
 ###################################################
 
+def natsort(seq):
+    def natural_key(string_):
+        return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
+    return sorted(seq, key=natural_key)
+
 def get_needles(needles):
     if needles == None:
         return -1
@@ -152,22 +158,25 @@ def get_needles(needles):
     except ValueError:
         return -1
 
-def parse_wool(wools):
-    if wools == None:
+def parse_str_list(str):
+    if str == None:
         return None
-    wools = wools.split(",")
-    for j in range(len(wools)):
+    str = str.split(",")
+    for j in range(len(str)):
         tmp = []
-        wools[j] = wools[j].strip()
-        for i in range(len(wools[j])):
-            if i == 0:
-                tmp.append(wools[j][i].upper())
-            elif wools[j][i] == " ":
+        str[j] = str[j].strip()
+        is_start = True
+        for i in range(len(str[j])):
+            if is_start:
+                tmp.append(str[j][i].upper())
+                is_start = False
+            elif str[j][i] == " ":
                 tmp.append("_")
+                is_start = True
             else:
-                tmp.append(wools[j][i].lower())
-        wools[j] = "".join(tmp)
-    return wools
+                tmp.append(str[j][i].lower())
+        str[j] = "".join(tmp)
+    return str
 
 def process_img_name(str):
     output = []
@@ -182,6 +191,18 @@ def process_img_name(str):
         else:
             output.append(hex(ord(c))[2:])
     return "".join(output)
+
+def sort_wools(wools):
+    one_word = []
+    multi_word = []
+    for w in wools:
+        if "_" in w:
+            multi_word.append(w)
+        else:
+            one_word.append(w)
+    one_word = sorted(one_word)
+    multi_word = sorted(multi_word)
+    return one_word + multi_word
 
 ###################################################
 #                                                 #
@@ -209,7 +230,8 @@ def line_to_dico(line):
         return None
 
     dico["needles"] = get_needles(line[11])
-    dico["wool"] = parse_wool(line[12])
+    dico["wool"] = parse_str_list(line[12])
+    dico["collec"] = parse_str_list(line[13])
     dico["url"] = line[14]
 
     dico["image"] = line[15]
@@ -280,6 +302,31 @@ print("| Total:      ", len(truc))
 print("|")
 print("'-=========================")
 
+types = {
+    "needles": [],
+    "wools": [],
+    "collec": []
+
+}
+
+for e in truc:
+    if e["wool"]:
+        for w in e["wool"]:
+            if w not in types["wools"]:
+                types["wools"].append(w)
+    if e["collec"]:
+        for c in e["collec"]:
+            if c not in types["collec"]:
+                types["collec"].append(c)
+    if e["needles"] not in types["needles"]:
+        types["needles"].append(e["needles"])
+
+types["needles"] = sorted(types["needles"])
+types["wools"] = sort_wools(types["wools"])
+types["collec"] = natsort(types["collec"])
 
 with open("data.json", "w") as f:
     json.dump(truc, f, indent=4)
+
+with open("types.json", "w") as f:
+    json.dump(types, f, indent=4)
