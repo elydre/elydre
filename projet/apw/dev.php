@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (move_uploaded_file($fileTmpPath, "src.csv")) {
                 echo 'Le fichier a été téléchargé avec succès.<br>';
-                exec("python3 crawl.py > crawl.log &");
+                exec("python3 crawl.py > crawl.log 2> err.log &");
 
                 echo 'Traitement en cours...';
             } else {

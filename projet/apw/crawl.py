@@ -58,9 +58,12 @@ def read_csv(file):
 
 def url_get_retry(url):
     for i in range(5):
-        response = requests.get(url)
-        if response.status_code < 500:
-            break
+        try:
+            response = requests.get(url)
+            if response.status_code < 500:
+                break
+        except requests.exceptions.RequestException as e:
+            pass
         g_stats["retries"] += 1
         time.sleep(random.uniform(0.5, 1.5))
     return response
@@ -277,7 +280,13 @@ if not os.path.exists(IMG_DIR):
     os.makedirs(IMG_DIR)
 
 for line in lines:
-    start_new_thread(thread_line_to_dico, (line,))
+    while True:
+        try:
+            start_new_thread(thread_line_to_dico, (line,))
+            break
+        except Exception as e:
+            print("Error:", e)
+            time.sleep(1)
 
 while ended_threads < len(lines):
     pass
