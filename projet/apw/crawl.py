@@ -123,7 +123,7 @@ def download_image(source_url, author, name):
         return None
 
     ext = url.split(".")[-1].lower()
-    if ext not in ["jpg", "jpeg", "png"]:
+    if ext not in ["jpg", "jpeg", "png", "webp"]:
         print("strange extension in", url)
         ext = "jpg"
 
@@ -213,8 +213,8 @@ def sort_wools(wools):
 #                                                 #
 ###################################################
 
-def line_to_dico(line):
-    printable_line = lambda x: "'" + " ".join([str(i) for i in x if i != None]) + "'"
+def line_to_dico(line, index):
+    printable_line = lambda idx, x: f"l{idx}: '" + " ".join([str(i) for i in x if i != None]) + "'"
     dico = {}
 
     if line[0] == None:
@@ -228,7 +228,7 @@ def line_to_dico(line):
             dico["type"] = i
             break
     else:
-        print("No name found for", printable_line(line))
+        print("No name found for", printable_line(index, line))
         g_stats["issues"] += 1
         return None
 
@@ -244,10 +244,10 @@ def line_to_dico(line):
         if dico["url"].startswith("https://www.ravelry.com/patterns/library"):
             dico["image"] = download_image(dico["url"], dico["author"], dico["name"])
         else:
-            print("other website without image for", printable_line(line))
+            print("other website without image for", printable_line(index, line))
 
     if dico["needles"] == -1:
-        print("No needles found for", printable_line(line))
+        print("No needles found for", printable_line(index, line))
         g_stats["issues"] += 1
         return None
 
@@ -256,10 +256,10 @@ def line_to_dico(line):
 global ended_threads
 ended_threads = 0
 
-def thread_line_to_dico(line):
+def thread_line_to_dico(line, index):
     global ended_threads
 
-    dico = line_to_dico(line)
+    dico = line_to_dico(line, index)
     if dico:
         truc.append(dico)
 
@@ -279,10 +279,10 @@ truc = []
 if not os.path.exists(IMG_DIR):
     os.makedirs(IMG_DIR)
 
-for line in lines:
+for i, line in enumerate(lines):
     while True:
         try:
-            start_new_thread(thread_line_to_dico, (line,))
+            start_new_thread(thread_line_to_dico, (line, i + 3))
             break
         except Exception as e:
             print("Error:", e)
