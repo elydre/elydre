@@ -10,9 +10,9 @@
         <img src="https://raw.githubusercontent.com/elydre/stats/master/generated/languages.svg" align="center"/>
     </a>
     <br><br>
-    <a href="https://discord.gg/PFbymQ3d97">
+    <!-- <a href="https://discord.gg/PFbymQ3d97">
         <img src="https://img.shields.io/discord/804096311975477279.svg?label=Discord&colorB=4F44D6&style=for-the-badge"/>
-    </a>
+    </a> -->
     <a href="https://github.com/antonkomarev/github-profile-views-counter">
         <img src="https://komarev.com/ghpvc/?username=elydre&color=61c265&label=GITHUB+PROFILE+VIEWS&style=for-the-badge"/>
     </a>
