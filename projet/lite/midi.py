@@ -36,6 +36,7 @@ KEYSYM_TO_NOTE_RANK_2 = {
 KEYSYM_TO_NOTE_RANK_1 = {
     60: 47,  # < -> B2
     119: 48,  # w -> C3
+    115: 49,  # s -> C#3
     120: 50,  # x -> D3
     100: 51,  # d -> D#3
     99: 52,  # c -> E3
