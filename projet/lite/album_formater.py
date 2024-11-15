@@ -94,16 +94,32 @@ def get_track_year(date):
     input("Press Enter to continue...")
     return None
 
-def update_date(audio):
+def update_mdata(audio):
+    need_save = False
+
+    # full date -> year
     if "date" in audio:
         date = audio["date"][0]
         year = get_track_year(date)
         if year is not None and year != date:
             print(f"    {date} -> {year}")
             audio["date"] = year
-            audio.save()
-            return year
-    return None
+            need_save = True
+    
+    # tracknumber/totaltracks -> tracknumber
+    if "tracknumber" in audio:
+        tracknumber = audio["tracknumber"][0]
+        if "/" in tracknumber:
+            tracknumber = tracknumber.split("/")[0]
+            print(f"    {audio['tracknumber'][0]} -> {tracknumber}")
+            audio["tracknumber"] = tracknumber
+            need_save = True
+
+    if need_save:
+        audio.save()
+        return True
+    return False
+
 
 def rename_album(dir_path):
     global track_count, edit_count
@@ -114,6 +130,7 @@ def rename_album(dir_path):
             try:                
                 path = os.path.join(dir_path, file)
                 audio = FLAC(path)
+                edited = update_mdata(audio)
                 if album_name is None:
                     album_name = audio['album'][0]
                 else:
@@ -126,12 +143,11 @@ def rename_album(dir_path):
                     new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
                 except: # one file album
                     new_name = f"{album_artist} - {audio['album'][0]}"
-                new_year = update_date(audio)
                 new_name = tofilename(new_name) + ".flac"
                 full_path = os.path.join(dir_path, new_name)
                 track_count += 1
                 if full_path == path:
-                    if new_year is not None:
+                    if edited:
                         edit_count += 1
                     continue
                 if os.path.exists(full_path):
