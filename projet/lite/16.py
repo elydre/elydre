@@ -81,5 +81,4 @@ PLAYER = 0
 p = Plateau()
 p.load_case()
 
-
 p.loop()

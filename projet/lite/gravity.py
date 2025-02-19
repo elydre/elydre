@@ -109,7 +109,7 @@ sun = Planet(400, 400, 20, (255, 255, 0))
 planets = [None for _ in range(5)]
 
 planets[0] = Planet(400, 200, 9, (0, 0, 255))       # neptune
-planets[1] = Planet(100, 400, 12, (255, 0, 0))       # titanus
+planets[1] = Planet(100, 400, 12, (255, 0, 0))      # titanus
 planets[2] = Planet(100, 600, 6, (0, 255, 255))     # uranus
 planets[3] = Planet(700, 600, 4, (0, 255, 0))       # auror
 planets[4] = Planet(100, 100, 7, (255, 255, 255))   # white
