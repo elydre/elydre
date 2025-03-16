@@ -2,84 +2,96 @@
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "blocks": [
     {
+      "type": "prompt",
       "alignment": "left",
       "segments": [
         {
-          "foreground": "#757575",
-          "style": "plain",
+          "properties": {
+            "cache_duration": "none"
+          },
           "template": "\u250c ",
-          "type": "text"
+          "foreground": "#757575",
+          "type": "text",
+          "style": "plain"
         },
         {
-          "background": "#cb96d7",
-          "foreground": "#100e23",
-          "powerline_symbol": "\ue0b0",
           "properties": {
+            "cache_duration": "none",
             "folder_separator_icon": " \ue0b1 ",
             "home_icon": "🏠",
             "style": "full"
           },
           "template": " {{ .Path }} ",
-          "style": "powerline",
-          "type": "path"
+          "foreground": "#100e23",
+          "powerline_symbol": "\ue0b0",
+          "background": "#cb96d7",
+          "type": "path",
+          "style": "powerline"
         },
         {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_stash_count": true,
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "template": " {{ .HEAD }}{{ .BranchStatus }}{{ if .Working.Changed }} {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \uf692 {{ .StashCount }}{{ end }} ",
+          "foreground": "#193549",
+          "powerline_symbol": "\ue0b0",
           "background": "#95ffa4",
+          "type": "git",
+          "style": "powerline",
           "background_templates": [
             "{{ if or (.Working.Changed) (.Staging.Changed) }}#ffa567{{ end }}",
             "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#f26d50{{ end }}",
             "{{ if gt .Ahead 0 }}#89d1dc{{ end }}",
             "{{ if gt .Behind 0 }}#e14cf5{{ end }}"
-          ],
-          "foreground": "#193549",
-          "powerline_symbol": "\ue0b0",
-          "properties": {
-            "fetch_stash_count": true,
-            "fetch_status": true,
-            "fetch_upstream_icon": true
-          },
-          "style": "powerline",
-          "template": " {{ .HEAD }}{{ .BranchStatus }}{{ if .Working.Changed }} {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \uf692 {{ .StashCount }}{{ end }} ",
-          "type": "git"
+          ]
         }
-      ],
-      "type": "prompt"
+      ]
     },
     {
+      "type": "prompt",
       "alignment": "right",
       "segments": [
         {
-          "foreground": "#007ACC",
           "properties": {
-            "always_enabled": true
+            "always_enabled": true,
+            "cache_duration": "none"
           },
-          "style": "plain",
-          "template": "⌛ {{ .FormattedMs }} ",
-          "type": "executiontime"
+          "template": "\u231b {{ .FormattedMs }} ",
+          "foreground": "#007ACC",
+          "type": "executiontime",
+          "style": "plain"
         }
-      ],
-      "type": "prompt"
+      ]
     },
     {
+      "type": "prompt",
       "alignment": "left",
-      "newline": true,
       "segments": [
         {
-          "foreground": "#757575",
-          "style": "plain",
+          "properties": {
+            "cache_duration": "none"
+          },
           "template": "\u2514 ",
-          "type": "text"
+          "foreground": "#757575",
+          "type": "text",
+          "style": "plain"
         },
         {
-          "foreground": "#ffffff",
-          "style": "plain",
+          "properties": {
+            "cache_duration": "none"
+          },
           "template": "$",
-          "type": "text"
+          "foreground": "#ffffff",
+          "type": "text",
+          "style": "plain"
         }
       ],
-      "type": "prompt"
+      "newline": true
     }
   ],
-  "final_space": true,
-  "version": 2
+  "version": 3,
+  "final_space": true
 }
