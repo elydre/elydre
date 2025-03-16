@@ -98,4 +98,4 @@ int main(void) {
     printf("elapsed: %.3fs, efficiency: %.2f%%, full wait %.2f%%\n", elapsed, 100.0 * REPEAT * CHILD_SLEEP / elapsed, (double) full_wait / 10 / elapsed);
 
     return 0;
-}*
+}
