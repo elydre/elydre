@@ -1,63 +1,39 @@
-from mutagen.flac import FLAC
-import os, sys
+from mutagen.flac import FLAC, Picture
+from PIL import Image
+import io, os, sys
 
-album_count = 0
-track_count = 0
-edit_count = 0
+ALBUM_COUNT  = 0
+TRACK_COUNT  = 0
+EDIT_COUNT   = 0
+MISIMG_COUNT = 0
+
+RELAOD_ALL = False # -r option
+
+REQUIRED_TAGS = ["artist", "album", "title", "date"]
+OPTIONAL_TAGS = ["tracknumber", "copyright", "isrc"]
+
+
+def say_issue(track, msg):
+    print(f"Error: {track}: {msg}")
+    input("Press Enter to continue...")
+
+
+def say_info(track, msg):
+    print(f"  {track}: {msg}")
+
 
 def tofilename(s, is_dir=False):
     # remove non-ascii characters
-    to_rep = [
-        ["â", "a"],
-        ["é", "e"],
-        ["è", "e"],
-        ["ê", "e"],
-        ["î", "i"],
-        ["ô", "o"],
-        ["û", "u"],
-        ["ù", "u"],
-
-        ["Â", "A"],
-        ["É", "E"],
-        ["È", "E"],
-        ["Î", "I"],
-        ["Ô", "O"],
-        ["Û", "U"],
-
-        ["ø", "o"],
-        ["Ø", "O"],
-        ["æ", "ae"],
-        ["Æ", "AE"],
-        ["œ", "oe"],
-        ["Œ", "OE"],
-
-        ["ä", "a"],
-        ["ë", "e"],
-        ["ï", "i"],
-        ["ö", "o"],
-        ["ü", "u"],
-
-        ["Ä", "A"],
-        ["Ë", "E"],
-        ["Ï", "I"],
-        ["Ö", "O"],
-        ["Ü", "U"],
-
-        ["’", "'"],
-        ["…", ""],
-        ["–", "-"],
-        ["—", "-"],
-        ["“", ""],
-
-        ["\"", ""],
-        ["'", " "],
-        [":", ""],
-        ["?", ""],
-        ["/", "-"],
-    ]
-
-    for r in to_rep:
-        s = s.replace(r[0], r[1])
+    for r in [
+        ["â", "a"], ["é", "e"], ["è", "e"], ["ê", "e"], ["î", "i"],
+        ["ô", "o"], ["û", "u"], ["ù", "u"], ["Â", "A"], ["É", "E"],
+        ["È", "E"], ["Î", "I"], ["Ô", "O"], ["Û", "U"], ["ø", "o"],
+        ["Ø", "O"], ["æ", "ae"], ["Æ", "AE"], ["œ", "oe"], ["Œ", "OE"],
+        ["ä", "a"], ["ë", "e"], ["ï", "i"], ["ö", "o"], ["ü", "u"],
+        ["Ä", "A"], ["Ë", "E"], ["Ï", "I"], ["Ö", "O"], ["Ü", "U"],
+        ["’", "'"], ["…", "" ], ["–", "-"], ["—", "-"], ["“", "" ],
+        ["\"", ""], ["'", " "], [":", "" ], ["?", "" ], ["/", "-"],
+    ]: s = s.replace(r[0], r[1])
 
     s = s.encode("ascii", "ignore").decode()
     if is_dir:
@@ -70,7 +46,8 @@ def tofilename(s, is_dir=False):
 
     return s.strip()
 
-def get_track_year(date):
+
+def get_track_year(track, date):
     if date is None:
         return None
     if len(date) == 4 and date.isdigit():
@@ -90,30 +67,71 @@ def get_track_year(date):
         except:
             pass
 
-    print(f"Error: invalid date format {date}")
-    input("Press Enter to continue...")
+    say_issue(track, "invalid date format {date}")
     return None
+
 
 def update_mdata(audio):
     need_save = False
 
+    track_name = audio["title"][0] if "title" in audio else None
+    if track_name is None: track_name = "???"
+
+    # check required tags
+    for tag in REQUIRED_TAGS:
+        if tag not in audio or len(audio[tag]) == 0:
+            say_issue(track_name, f"{tag} not found")
+            return False
+
     # full date -> year
-    if "date" in audio:
-        date = audio["date"][0]
-        year = get_track_year(date)
-        if year is not None and year != date:
-            print(f"    {date} -> {year}")
-            audio["date"] = year
-            need_save = True
-    
-    # tracknumber/totaltracks -> tracknumber
-    if "tracknumber" in audio:
-        tracknumber = audio["tracknumber"][0]
-        if "/" in tracknumber:
-            tracknumber = tracknumber.split("/")[0]
-            print(f"    {audio['tracknumber'][0]} -> {tracknumber}")
-            audio["tracknumber"] = tracknumber
-            need_save = True
+    date = audio["date"][0]
+    year = get_track_year(track_name, date)
+    if year is not None and year != date:
+        say_info(track_name, f"date {date} -> {year}")
+        audio["date"] = year
+        need_save = True
+
+    # "tracknumber/totaltracks" -> "tracknumber"
+    tracknumber = audio["tracknumber"][0]
+
+    if "/" in tracknumber:
+        tracknumber = tracknumber.split("/")[0]
+    try:
+        tracknumber = str(int(tracknumber))
+    except:
+        say_issue(track_name, f"invalid tracknumber {tracknumber}")
+        return False
+    if len(tracknumber) > 2 or tracknumber < "1":
+        say_issue(track_name, f"invalid tracknumber {tracknumber}")
+        return False
+    if len(tracknumber) == 1:
+        tracknumber = "0" + tracknumber
+    if tracknumber != audio["tracknumber"][0]:
+        say_info(track_name, f"tracknumber {audio['tracknumber'][0]} -> {tracknumber}")
+        audio["tracknumber"] = tracknumber
+        need_save = True
+
+    removed_tags = []
+
+    # remove useless tags
+    for key in audio.keys():
+        if key not in REQUIRED_TAGS and key not in OPTIONAL_TAGS:
+            del audio[key]
+        elif not isinstance(audio[key], list):
+            say_issue(f"invalid type for {key}: {type(audio[key])}")
+            continue
+        elif len(audio[key]) == 0:
+            del audio[key]
+        elif len(audio[key]) > 1:
+            audio[key] = audio[key][0]
+        else:
+            continue
+
+        removed_tags.append(key)
+        need_save = True
+
+    if len(removed_tags) > 0:
+        print(f"  {track_name}: removing tags: {', '.join(removed_tags)}")
 
     if need_save:
         audio.save()
@@ -121,50 +139,112 @@ def update_mdata(audio):
     return False
 
 
+def update_cover(audio, album_cover):
+    if album_cover is None:
+        return False
+
+    # check if the cover is already in the right format
+    if not RELAOD_ALL and len(audio.pictures) == 1 and audio.pictures[0].width == 600 and \
+            audio.pictures[0].height == 600 and audio.pictures[0].type == 3:
+        return False
+
+    # remove all pictures
+    audio.clear_pictures()
+
+    # create a new picture from the album cover in 600x600
+    img = Image.open(album_cover)
+    img = img.convert("RGB")
+    img = img.resize((600, 600), Image.LANCZOS)
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format="JPEG")
+    img_byte_arr.seek(0)
+
+    # add the new picture to the audio file
+    picture = Picture()
+    picture.data = img_byte_arr.read()
+    picture.type = 3 # front cover
+    picture.mime = "image/jpeg"
+    picture.desc = ""
+    picture.width  = 600
+    picture.height = 600
+    audio.add_picture(picture)
+
+    say_info(audio["title"][0], f"new cover generated")
+
+    audio.save()
+    return True
+
+
 def rename_album(dir_path):
-    global track_count, edit_count
+    global TRACK_COUNT, EDIT_COUNT, MISIMG_COUNT
     album_name = None
     album_artist = None
+
+    # check for album cover
+    for name in ["cover.jpg", "cover.png"]:
+        if os.path.exists(os.path.join(dir_path, name)):
+            album_cover = os.path.join(dir_path, name)
+            break
+    else:
+        print("  No cover file found, please add one")
+        MISIMG_COUNT += 1
+        album_cover = None
+
     for file in os.listdir(dir_path):
-        if file.endswith("flac"):
-            try:                
-                path = os.path.join(dir_path, file)
-                audio = FLAC(path)
-                edited = update_mdata(audio)
-                if album_name is None:
-                    album_name = audio['album'][0]
-                else:
-                    if album_name != audio['album'][0]:
-                        print(f"Album name mismatch: {album_name} != {audio['album'][0]}")
-                        return
-                if album_artist is None:
-                    album_artist = audio['artist'][0].split(" - ")[0].split(",")[0].strip()
-                try:    # multi track album
-                    new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
-                except: # one file album
-                    new_name = f"{album_artist} - {audio['album'][0]}"
-                new_name = tofilename(new_name) + ".flac"
-                full_path = os.path.join(dir_path, new_name)
-                track_count += 1
-                if full_path == path:
-                    if edited:
-                        edit_count += 1
-                    continue
-                if os.path.exists(full_path):
-                    print(f"Error: {full_path} already exists")
-                    input("Press Enter to continue...")
-                    return
-                os.rename(path, full_path)
-                edit_count += 1
-                print(f"    {new_name}")
-            except Exception as e:
-                print(f"Error: {e}")
-                input("Press Enter to continue...")
+        if not file.endswith("flac"):
+            continue
+
+        path = os.path.join(dir_path, file)
+
+        # global metadata
+        try:               
+            audio = FLAC(path)
+
+            edited  = update_mdata(audio)
+            edited |= update_cover(audio, album_cover)
+
+            if album_name is None:
+                album_name = audio['album'][0]
+            elif album_name != audio['album'][0]:
+                say_issue(file, f"album name mismatch: {album_name} != {audio['album'][0]}")
                 return
+
+            if album_artist is None:
+                album_artist = audio['artist'][0]
+            elif album_artist != audio['artist'][0]:
+                say_issue(file, f"artist name mismatch: {album_artist} != {audio['artist'][0]}")
+                return
+
+            try:    # multi track album
+                new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
+            except: # one file album
+                new_name = f"{album_artist} - {audio['album'][0]}"
+
+            new_name = tofilename(new_name) + ".flac"
+            full_path = os.path.join(dir_path, new_name)
+            TRACK_COUNT += 1
+            
+            if full_path == path:
+                if edited:
+                    EDIT_COUNT += 1
+                continue
+
+            if os.path.exists(full_path):
+                say_issue(file, f"file already exists: {full_path}")
+                return
+
+            say_info(file, f"renaming to {new_name}")
+            os.rename(path, full_path)
+            EDIT_COUNT += 1
+
+        except Exception as e:
+            say_issue(file, f"Error: {e}")
+            return
 
     # rename album folder
     album_name = tofilename(f"{album_artist} - {album_name}", True)
     os.rename(dir_path, os.path.join(os.path.dirname(dir_path), album_name))
+
 
 def is_album_dir(dir_path):
     # check if dir contains flac files and no subdirs
@@ -173,18 +253,24 @@ def is_album_dir(dir_path):
     subdirs = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
     return len(flac_files) > 0 and len(subdirs) == 0
 
+
 def recursive_rename_albums(root_dir):
     for dir_path, _, _ in os.walk(root_dir):
         if is_album_dir(dir_path):
-            global album_count
-            album_count += 1
-            print(f"album: {dir_path}")
+            dir_path = os.path.abspath(dir_path)
+            global ALBUM_COUNT
+            ALBUM_COUNT += 1
+            print(dir_path.split('/')[-1])
             rename_album(dir_path)
 
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python renamer.py <root_dir>")
+    if len(sys.argv) == 2 and sys.argv[1] == "-r":
+        RELAOD_ALL = True
+
+    elif len(sys.argv) != 1:
+        print("Usage: python renamer.py [-r]")
         sys.exit(1)
-    root_dir = sys.argv[1]
-    recursive_rename_albums(root_dir)
-    print(f"Done, {album_count} albums renamed ({track_count} tracks, {edit_count} edited)")
+
+    recursive_rename_albums(".")
+    print(f"Done, {ALBUM_COUNT} albums ({TRACK_COUNT} tracks, {EDIT_COUNT} edited, {MISIMG_COUNT} missing covers)")
