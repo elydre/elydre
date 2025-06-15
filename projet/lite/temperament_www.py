@@ -164,7 +164,7 @@ class temperament:
             for j in range(12):
                 jr, tr = self.calculate_ratio(j, i + j)
                 r = tr / jr * 100 - 100
-                table += f"<td style='color: {gen_color(r)}'><b>{r:.2f}</b></td>"
+                table += f"<td><span title=\"{NAMES[(j + i) % 12]}\"><b style='color: {gen_color(r)}'>{r:.2f}</b></span></td>"
 
         table += "</tr></table>"
 
@@ -191,7 +191,12 @@ def index():
         temperament(
             "Mercadier 1/12 & 1/6",
             [5.87, 0, 1.96, 1.95, -1.95, 5.87, 0, 3.91, 0, 0, 3.91, 0]
-        )
+        ),
+
+        temperament(
+            "Kirnberger III",
+            [10.264, 0.489, 3.421, 4.399, -3.422, 8.309, 0.488, 6.842, 2.444, 0, 6.354, -1.467]
+        ),
     ]
 
     return html_header + "".join([e.make_table() for e in t])
