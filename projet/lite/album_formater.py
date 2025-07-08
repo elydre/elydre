@@ -39,14 +39,19 @@ def tofilename(s):
                     break
 
         return result.strip()
+    
 
-    s = transliterate_japanese(s)
+    for r in [["\xa0", " "], ["œ", "oe"], ["Œ", "OE"],
+              ["æ", "ae"], ["Æ", "AE"], ["’", "'"], ["…", ""],
+              ["“", ""], ["`", "'"], ["´", "'"]]:
+        s = s.replace(r[0], r[1])
 
-    for r in [
-        ["’", "'"], ["…", "" ], ["–", "-"], ["—", "-"], ["“", "" ],
-        ["\"", ""], ["'", " "], [":", "" ], ["?", "" ], ["/", "-"],
-        ["<", "" ], [">", "" ], ["\\", "" ], ["|", "" ], [".", ""],
-    ]: s = s.replace(r[0], r[1])
+    s = transliterate_japanese(s.replace("\xa0", " "))
+
+    for r in [["–", "-"], ["—", "-"], ["/", "-"], ["!", ""],
+              ["\"", ""], ["'", " "], [".", ""],  ["?", ""],
+              ["<", ""],  [">", ""],  ["\\", ""], ["|", ""]]:
+        s = s.replace(r[0], r[1])
 
     s = s.encode("ascii", "ignore").decode()
 
@@ -263,13 +268,17 @@ def is_album_dir(dir_path):
 
 
 def recursive_rename_albums(root_dir):
-    for dir_path, _, _ in os.walk(root_dir):
-        if is_album_dir(dir_path):
-            dir_path = os.path.abspath(dir_path)
-            global ALBUM_COUNT
-            ALBUM_COUNT += 1
-            print(f"\033[90m{dir_path.split('/')[-1]}\033[0m")
-            rename_album(dir_path)
+    dirs_paths = [e for e, _, _ in os.walk(root_dir) if is_album_dir(e)]
+
+    # sort directories by name
+    dirs_paths.sort(key=lambda x: x.lower())
+
+    for dir_path in dirs_paths:
+        dir_path = os.path.abspath(dir_path)
+        global ALBUM_COUNT
+        ALBUM_COUNT += 1
+        print(f"\033[90m{dir_path.split('/')[-1]}\033[0m")
+        rename_album(dir_path)
 
 
 if __name__ == "__main__":
