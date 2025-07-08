@@ -1,6 +1,11 @@
 from mutagen.flac import FLAC, Picture
 from PIL import Image
 import io, os, sys
+import pykakasi
+
+
+kks = pykakasi.kakasi()
+
 
 ALBUM_COUNT  = 0
 TRACK_COUNT  = 0
@@ -22,25 +27,28 @@ def say_info(track, msg):
     print(f"  {track}: {msg}")
 
 
-def tofilename(s, is_dir=False):
-    # remove non-ascii characters
+def tofilename(s):
+    def transliterate_japanese(s):
+        result = ""
+        
+        for e in kks.convert(s):
+            result += e['hepburn']
+            for c in e['orig']:
+                if '\u4e00' <= c <= '\u9fff' or '\u3040' <= c <= '\u309f' or '\u30a0' <= c <= '\u30ff':
+                    result += " "
+                    break
+
+        return result.strip()
+
+    s = transliterate_japanese(s)
+
     for r in [
-        ["â", "a"], ["é", "e"], ["è", "e"], ["ê", "e"], ["î", "i"],
-        ["ô", "o"], ["û", "u"], ["ù", "u"], ["Â", "A"], ["É", "E"],
-        ["È", "E"], ["Î", "I"], ["Ô", "O"], ["Û", "U"], ["ø", "o"],
-        ["Ø", "O"], ["æ", "ae"], ["Æ", "AE"], ["œ", "oe"], ["Œ", "OE"],
-        ["ä", "a"], ["ë", "e"], ["ï", "i"], ["ö", "o"], ["ü", "u"],
-        ["Ä", "A"], ["Ë", "E"], ["Ï", "I"], ["Ö", "O"], ["Ü", "U"],
         ["’", "'"], ["…", "" ], ["–", "-"], ["—", "-"], ["“", "" ],
         ["\"", ""], ["'", " "], [":", "" ], ["?", "" ], ["/", "-"],
-        ["<", "" ], [">", "" ], ["\\", "" ], ["|", "" ],
+        ["<", "" ], [">", "" ], ["\\", "" ], ["|", "" ], [".", ""],
     ]: s = s.replace(r[0], r[1])
 
     s = s.encode("ascii", "ignore").decode()
-    if is_dir:
-        s = s.replace(".", "")
-    else:
-        s = s[:4] + s[4:].replace(".", "")
 
     while "  " in s:
         s = s.replace("  ", " ")
@@ -217,11 +225,10 @@ def rename_album(dir_path):
                 return
 
             try:    # multi track album
-                new_name = f"{int(audio['tracknumber'][0]):02d}. {album_artist} - {audio['title'][0]}"
+                new_name = f"{int(audio['tracknumber'][0]):02d}. {tofilename(album_artist)} - {tofilename(audio['title'][0])}.flac"
             except: # one file album
-                new_name = f"{album_artist} - {audio['album'][0]}"
+                new_name = f"{album_artist} - {tofilename(audio['album'][0])}.flac"
 
-            new_name = tofilename(new_name) + ".flac"
             full_path = os.path.join(dir_path, new_name)
             TRACK_COUNT += 1
             
@@ -243,7 +250,7 @@ def rename_album(dir_path):
             return
 
     # rename album folder
-    album_name = tofilename(f"{album_artist} - {album_name}", True)
+    album_name = f"{tofilename(album_artist)} - {tofilename(album_name)}"
     os.rename(dir_path, os.path.join(os.path.dirname(dir_path), album_name))
 
 
@@ -261,7 +268,7 @@ def recursive_rename_albums(root_dir):
             dir_path = os.path.abspath(dir_path)
             global ALBUM_COUNT
             ALBUM_COUNT += 1
-            print(dir_path.split('/')[-1])
+            print(f"\033[90m{dir_path.split('/')[-1]}\033[0m")
             rename_album(dir_path)
 
 
