@@ -30,7 +30,7 @@ def say_info(track, msg):
 def tofilename(s):
     def transliterate_japanese(s):
         result = ""
-        
+
         for e in kks.convert(s):
             result += e['hepburn']
             for c in e['orig']:
@@ -39,7 +39,6 @@ def tofilename(s):
                     break
 
         return result.strip()
-    
 
     for r in [["\xa0", " "], ["œ", "oe"], ["Œ", "OE"],
               ["æ", "ae"], ["Æ", "AE"], ["’", "'"], ["…", ""],
@@ -212,7 +211,7 @@ def rename_album(dir_path):
         path = os.path.join(dir_path, file)
 
         # global metadata
-        try:               
+        try:
             audio = FLAC(path)
 
             edited  = update_mdata(audio)
@@ -237,7 +236,7 @@ def rename_album(dir_path):
 
             full_path = os.path.join(dir_path, new_name)
             TRACK_COUNT += 1
-            
+
             if full_path == path:
                 if edited:
                     EDIT_COUNT += 1
