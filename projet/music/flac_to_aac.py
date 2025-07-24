@@ -1,85 +1,97 @@
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image
-import io, os, sys
+import subprocess
+import threading
+import time
+import sys
+import os
+import io
 
 
-def update_cover(audio, album_cover):
-    if album_cover is None:
-        return False
+T_COUNT = 0
+M_COUNT = 28
 
-    # Redimensionne l'image en 600x600 JPEG
+COMPLETED = 0
+TOTAL = 0
+
+OUTPUT_DIR = None
+
+def update_cover(path, album_cover):
+    audio = MP4(path)
+
     img = Image.open(album_cover)
     img = img.convert("RGB")
-    img = img.resize((600, 600), Image.LANCZOS)
+    img = img.resize((1200, 1200), Image.LANCZOS)
     img_byte_arr = io.BytesIO()
-    img.save(img_byte_arr, format="JPEG")
+    img.save(img_byte_arr, format="PNG")
     img_data = img_byte_arr.getvalue()
 
     # Ajoute la nouvelle couverture
-    cover = MP4Cover(img_data, imageformat=MP4Cover.FORMAT_JPEG)
+    cover = MP4Cover(img_data, imageformat=MP4Cover.FORMAT_PNG)
     audio["covr"] = [cover]
 
-    try:
-        title = audio.get("\xa9nam", ["(unknown)"])[0]
-        print(f"[✓] {title} → cover mise à jour")
-    except Exception:
-        pass
-
     audio.save()
-    return True
 
 
-def rename_album(dir_path):
-    # check for album cover
+def convert_flac_to_m4a(input_file):
+
     for name in ["cover.jpg", "cover.png"]:
-        if os.path.exists(os.path.join(dir_path, name)):
-            album_cover = os.path.join(dir_path, name)
+        path = os.path.join(os.path.dirname(input_file), name)
+        if os.path.exists(path):
             break
     else:
-        print("  No cover file found, please add one")
-        MISIMG_COUNT += 1
-        album_cover = None
+        print(f"No cover file found for {input_file}!")
+        os._exit(1)
 
-    for file in os.listdir(dir_path):
-        if not file.endswith("m4a"):
-            continue
+    output_file = os.path.join(OUTPUT_DIR, os.path.basename(os.path.dirname(input_file)), f"{os.path.splitext(os.path.basename(input_file))[0]}.m4a")
 
-        path = os.path.join(dir_path, file)
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-        # global metadata
-        audio = MP4(path)
+    if (subprocess.run([
+        "ffmpeg",
+        "-loglevel", "error",
+        "-y",
+        "-i", input_file,
+        "-map", "a",
+        "-acodec", "aac",
+        "-b:a", "256k",
+        "-ar", "44100",
+        output_file
+    ])).returncode != 0:
+        print(f"Error converting {input_file} to M4A!")
+        os._exit(1)
 
-        EDIT_COUNT += update_cover(audio, album_cover)
+    update_cover(output_file, path)
 
 
-def is_album_dir(dir_path):
-    # check if dir contains m4a files and no subdirs
-    m4a_files = [file for file in os.listdir(dir_path) if
-                    os.path.isfile(os.path.join(dir_path, file)) and file.endswith("m4a")]
-    subdirs = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
-    return len(m4a_files) > 0 and len(subdirs) == 0
+    global T_COUNT, COMPLETED
+    T_COUNT -= 1
+    COMPLETED += 1
 
-
-def recursive_rename_albums(root_dir):
-    dirs_paths = [e for e, _, _ in os.walk(root_dir) if is_album_dir(e)]
-
-    # sort directories by name
-    dirs_paths.sort(key=lambda x: x.lower())
-
-    for dir_path in dirs_paths:
-        dir_path = os.path.abspath(dir_path)
-        global ALBUM_COUNT
-        ALBUM_COUNT += 1
-        print(f"\033[90m{dir_path.split('/')[-1]}\033[0m")
-        rename_album(dir_path)
-
+    print(f"{COMPLETED/TOTAL * 100:.2f}% - {output_file}")
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1] == "-r":
-        RELAOD_ALL = True
-
-    elif len(sys.argv) != 1:
-        print("Usage: python renamer.py [-r]")
+    if len(sys.argv) != 3:
+        print("Usage: python truc.py <input_dir> <output_dir>")
         sys.exit(1)
 
-    recursive_rename_albums(".")
+    OUTPUT_DIR = sys.argv[2]
+
+    for root, dirs, files in os.walk(sys.argv[1]):
+        for file in files:
+            if file.lower().endswith('.flac'):
+                TOTAL += 1
+
+    for root, dirs, files in os.walk(sys.argv[1]):
+        for file in files:
+            if file.lower().endswith('.flac'):
+                T_COUNT += 1
+                while T_COUNT >= M_COUNT:
+                    time.sleep(0.1)
+                threading.Thread(target=convert_flac_to_m4a, args=(os.path.join(root, file),)).start()
+
+    while T_COUNT > 0:
+        time.sleep(0.1)
+
+    os.system("stty sane")
+    os._exit(0)
