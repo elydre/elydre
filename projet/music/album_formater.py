@@ -223,16 +223,15 @@ def rename_album(dir_path):
                 say_issue(file, f"album name mismatch: {album_name} != {audio['album'][0]}")
                 return
 
-            if album_artist is None:
+            if album_artist is None and album_artist != "various":
                 album_artist = audio['artist'][0]
             elif album_artist != audio['artist'][0]:
-                say_issue(file, f"artist name mismatch: {album_artist} != {audio['artist'][0]}")
-                return
+                album_artist = "various"
 
             try:    # multi track album
-                new_name = f"{int(audio['tracknumber'][0]):02d}. {tofilename(album_artist)} - {tofilename(audio['title'][0])}.flac"
+                new_name = f"{int(audio['tracknumber'][0]):02d}. {tofilename(audio['artist'][0])} - {tofilename(audio['title'][0])}.flac"
             except: # one file album
-                new_name = f"{album_artist} - {tofilename(audio['album'][0])}.flac"
+                new_name = f"{audio['artist'][0]} - {tofilename(audio['album'][0])}.flac"
 
             full_path = os.path.join(dir_path, new_name)
             TRACK_COUNT += 1
