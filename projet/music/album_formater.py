@@ -285,7 +285,7 @@ if __name__ == "__main__":
         RELAOD_ALL = True
 
     elif len(sys.argv) != 1:
-        print("Usage: python renamer.py [-r]")
+        print("Usage: python album_formater.py [-r]")
         sys.exit(1)
 
     recursive_rename_albums(".")

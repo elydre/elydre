@@ -80,7 +80,7 @@ def get_allout(output_root):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python truc.py <input_dir> <output_root>")
+        print("Usage: python flac_to_aac.py <input_dir> <output_root>")
         sys.exit(1)
 
     output_root = sys.argv[2]
