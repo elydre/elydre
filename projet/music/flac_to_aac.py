@@ -78,6 +78,14 @@ def get_allout(output_root):
 
     return [album for album in os.listdir(output_root) if os.path.isdir(os.path.join(output_root, album))]
 
+def should_ignore(album, aac_ignore):
+    if album in aac_ignore:
+        return True
+    for pattern in aac_ignore:
+        if pattern.endswith('*') and album.startswith(pattern[:-1]):
+            return True
+    return False
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python flac_to_aac.py <input_dir> <output_root>")
@@ -103,7 +111,7 @@ if __name__ == "__main__":
 
         allin.append(album)
 
-        if album in aac_ignore:
+        if should_ignore(album, aac_ignore):
             print(f"IGN - {album}")
             continue
 
@@ -130,16 +138,17 @@ if __name__ == "__main__":
 
     while T_COUNT > 0:
         time.sleep(0.1)
+        
+    os.system("stty sane")
+
+    print("All conversions completed.")
 
     for album in allout:
-        if album not in allin:
+        if (album not in allin) or should_ignore(album, aac_ignore):
             dirpath = os.path.join(output_root, album)
             print(f"'{album}' found in output but not in input")
             if input("Delete it? (y/n) ").strip().lower() == 'y':
                 print(f"Deleting {dirpath}")
                 os.system(f"rm -rf '{dirpath}'")
 
-    print("All conversions completed.")
-
-    os.system("stty sane")
     os._exit(0)
