@@ -183,7 +183,7 @@ def update_cover(audio, album_cover):
     picture.height = 600
     audio.add_picture(picture)
 
-    say_info(audio["title"][0], f"new cover generated")
+    say_info(f"{audio['tracknumber'][0]}. {audio['title'][0]}", "new cover generated")
 
     audio.save()
     return True
@@ -203,8 +203,11 @@ def rename_album(dir_path):
         print("  No cover file found, please add one")
         MISIMG_COUNT += 1
         album_cover = None
+        
+    files = os.listdir(dir_path)
+    files.sort()
 
-    for file in os.listdir(dir_path):
+    for file in files:
         if not file.endswith("flac"):
             continue
 
