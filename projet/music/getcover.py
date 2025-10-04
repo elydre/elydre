@@ -27,7 +27,7 @@ for d in directories:
         r = "/".join(response.text.split("https://is1-ssl.mzstatic.com/image/thumb/")[1].split("/")[:-1])
         fmt = r.split(".")[-1]
         r = f"https://is1-ssl.mzstatic.com/image/thumb/{r}/3000x3000.{fmt}"
-    except:
+    except IndexError:
         print(f"{d} [Not found]")
         continue
 
