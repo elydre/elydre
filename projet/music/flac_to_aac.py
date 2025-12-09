@@ -58,7 +58,6 @@ def convert_flac_to_m4a(input_file, output_file):
 
     update_cover(output_file, path)
 
-
     global T_COUNT, COMPLETED
     T_COUNT -= 1
     COMPLETED += 1
@@ -67,10 +66,10 @@ def convert_flac_to_m4a(input_file, output_file):
 
 def read_aac_ignore(file_path):
     if not os.path.exists(file_path):
-        return []
+        return {}
     
     with open(file_path, 'r') as f:
-        return [line.strip() for line in f if line.strip()]
+        return {line.strip(): False for line in f if line.strip()}
 
 def get_allout(output_root):
     if not os.path.isdir(output_root):
@@ -79,11 +78,15 @@ def get_allout(output_root):
     return [album for album in os.listdir(output_root) if os.path.isdir(os.path.join(output_root, album))]
 
 def should_ignore(album, aac_ignore):
-    if album in aac_ignore:
+    if album in aac_ignore.keys():
+        aac_ignore[album] = True
         return True
-    for pattern in aac_ignore:
+
+    for pattern in aac_ignore.keys():
         if pattern.endswith('*') and album.startswith(pattern[:-1]):
+            aac_ignore[pattern] = True
             return True
+
     return False
 
 if __name__ == "__main__":
@@ -150,5 +153,9 @@ if __name__ == "__main__":
             if input("Delete it? (y/n) ").strip().lower() == 'y':
                 print(f"Deleting {dirpath}")
                 os.system(f"rm -rf '{dirpath}'")
+    
+    for pattern, used in aac_ignore.items():
+        if not used:
+            print(f"Unused ignore pattern: {pattern}")
 
     os._exit(0)
