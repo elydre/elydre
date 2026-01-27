@@ -12,7 +12,8 @@ TRACK_COUNT  = 0
 EDIT_COUNT   = 0
 MISIMG_COUNT = 0
 
-RELAOD_ALL = False # -r option
+RELAOD_ALL = False    # -r option
+KEEP_DIR   = False    # -d option (do not rename album dir)
 
 REQUIRED_TAGS = ["artist", "album", "title", "date"]
 OPTIONAL_TAGS = ["tracknumber", "copyright", "isrc"]
@@ -256,6 +257,9 @@ def rename_album(dir_path):
             say_issue(file, f"Error: {e}")
             return
 
+    if KEEP_DIR:
+        return
+
     # rename album folder
     album_name = f"{tofilename(album_artist)} - {tofilename(album_name)}"
     os.rename(dir_path, os.path.join(os.path.dirname(dir_path), album_name))
@@ -284,12 +288,14 @@ def recursive_rename_albums(root_dir):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1] == "-r":
-        RELAOD_ALL = True
-
-    elif len(sys.argv) != 1:
-        print("Usage: python album_formater.py [-r]")
-        sys.exit(1)
+    for arg in sys.argv[1:]:
+        if arg == "-r":
+            RELAOD_ALL = True
+        elif arg == "-d":
+            KEEP_DIR = True
+        else:
+            print("Usage: python album_formater.py [-r]")
+            sys.exit(1)
 
     recursive_rename_albums(".")
     print(f"Done, {ALBUM_COUNT} albums ({TRACK_COUNT} tracks, {EDIT_COUNT} edited, {MISIMG_COUNT} missing covers)")
