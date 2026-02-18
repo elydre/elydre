@@ -26,5 +26,7 @@ file 'track2.flac'
 file 'track3.flac'
 """
 
-# ffmpeg -f concat -safe 0 -i list.txt -c copy album.flac && ffmpeg -i album.flac album.wav && ffmpeg -i album.wav -ab 320k album.mp3
+# ffmpeg -f concat -safe 0 -i list.txt -c copy album.flac && ffmpeg -i album.flac album.wav && ffmpeg -i album.wav -ab 320k album.mp3 && rm album.flac album.wav
 # ffmpeg -loop 1 -i main.png -i album.mp3 -c:v libx264 -tune stillimage -c:a copy -shortest -pix_fmt yuv420p -movflags +faststart video_youtube.mp4
+
+# cover size 1500x1500 -> 2222 x 1666

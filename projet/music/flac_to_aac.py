@@ -19,7 +19,7 @@ def update_cover(path, album_cover):
 
     img = Image.open(album_cover)
     img = img.convert("RGB")
-    img = img.resize((1000, 1000), Image.LANCZOS)
+    img = img.resize((1200, 1200), Image.LANCZOS)
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format="JPEG", quality=95)
     img_data = img_byte_arr.getvalue()
