@@ -12,10 +12,6 @@ import os
 directories = sys.argv[1:]
 
 if not directories:
-    print("NOTE:    path used as album name, write album name as argument for fine searching")
-    print("Usage:   python getcover.py [first album name] [second album name] [...]")
-    print("->       python getcover.py 'Lana Del Rey - Blue Banisters'\n")
-
     directories = [os.path.basename(os.getcwd())]
 
 for d in directories:
