@@ -16,8 +16,9 @@ RELAOD_ALL = False    # -r option
 KEEP_DIR   = False    # -d option (do not rename album dir)
 
 REQUIRED_TAGS = ["artist", "album", "title", "date"]
-OPTIONAL_TAGS = ["tracknumber", "copyright", "isrc"]
+OPTIONAL_TAGS = ["tracknumber", "copyright", "isrc", "albumartist"]
 
+VARIOUS = "various"
 
 def say_issue(track, msg):
     print(f"Error: {track}: {msg}")
@@ -208,6 +209,8 @@ def rename_album(dir_path):
     files = os.listdir(dir_path)
     files.sort()
 
+    flacs = []
+
     for file in files:
         if not file.endswith("flac"):
             continue
@@ -217,7 +220,8 @@ def rename_album(dir_path):
         # global metadata
         try:
             audio = FLAC(path)
-
+            flacs.append((file, audio))
+    
             edited  = update_mdata(audio)
             edited |= update_cover(audio, album_cover)
 
@@ -227,10 +231,10 @@ def rename_album(dir_path):
                 say_issue(file, f"album name mismatch: {album_name} != {audio['album'][0]}")
                 return
 
-            if album_artist is None and album_artist != "various":
+            if album_artist is None and album_artist != VARIOUS:
                 album_artist = audio['artist'][0]
             elif album_artist != audio['artist'][0]:
-                album_artist = "various"
+                album_artist = VARIOUS
 
             try:    # multi track album
                 new_name = f"{int(audio['tracknumber'][0]):02d}. {tofilename(audio['artist'][0])} - {tofilename(audio['title'][0])}.flac"
@@ -256,6 +260,12 @@ def rename_album(dir_path):
         except Exception as e:
             say_issue(file, f"Error: {e}")
             return
+    
+    for file, audio in flacs:
+        if ("albumartist" not in audio) or (audio["albumartist"][0] != album_artist):
+            audio["albumartist"] = album_artist
+            say_info(file, f"setting albumartist to {album_artist}")
+            audio.save()
 
     if KEEP_DIR:
         return

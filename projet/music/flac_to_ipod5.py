@@ -53,7 +53,13 @@ def update_cover(path, album_cover):
     audio.add_picture(picture)
 
     audio.save()
-    
+
+def make_tiny_cover(input_cover, output_cover):
+    img = Image.open(input_cover)
+    img = img.convert("RGB")
+    img = img.resize((500, 500), Image.LANCZOS)
+    img.save(output_cover, format="JPEG", quality=98)
+
 
 def convert_flac_to_flac16(input_file, output_dir):
     """
@@ -67,8 +73,8 @@ def convert_flac_to_flac16(input_file, output_dir):
     global T_COUNT, COMPLETED
 
     for name in ["cover.jpg", "cover.png"]:
-        path = os.path.join(os.path.dirname(input_file), name)
-        if os.path.exists(path):
+        cover_path = os.path.join(os.path.dirname(input_file), name)
+        if os.path.exists(cover_path):
             break
     else:
         print(f"No cover file found for {input_file}!")
@@ -77,19 +83,29 @@ def convert_flac_to_flac16(input_file, output_dir):
     in_audio = FLAC(input_file)
 
     album_artist = in_audio.get("albumartist", [in_audio.get("artist", ["Unknown"])[0]])[0]
+    artist       = in_audio.get("artist", ["Unknown"])[0]
     album_name   = in_audio.get("album", ["Unknown"])[0]
     track_number = in_audio.get("tracknumber", ["0"])[0]
     title        = in_audio.get("title", ["Unknown"])[0]
 
-    output_file = os.path.join(output_dir, tofilename(album_artist), tofilename(album_name), f"{track_number}. {tofilename(title)}.flac")
+    output_file = os.path.join(output_dir, tofilename(album_artist), tofilename(album_name), f"{track_number}. {tofilename(artist) + ' - ' if artist != album_artist else ''}{tofilename(title)}.flac")
     OUTFILES.append(output_file)
+
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    tiny_cover = os.path.join(os.path.dirname(output_file), "cover.jpg")
+
+    if tiny_cover not in OUTFILES:
+        OUTFILES.append(tiny_cover)
+
+        if not os.path.exists(tiny_cover):
+            print(f"Creating {tiny_cover}")
+            make_tiny_cover(cover_path, tiny_cover)
 
     if os.path.exists(output_file):
         T_COUNT -= 1
         COMPLETED += 1
         return
-
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     # read input kbps and sample rate
     info = subprocess.run([
@@ -131,7 +147,7 @@ def convert_flac_to_flac16(input_file, output_dir):
         print(f"Error converting {input_file} to ALAC!")
         os._exit(1)
 
-    update_cover(output_file, path)
+    update_cover(output_file, cover_path)
 
     T_COUNT -= 1
     COMPLETED += 1
