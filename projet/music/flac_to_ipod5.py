@@ -8,7 +8,7 @@ import os
 import io
 
 T_COUNT = 0
-M_COUNT = 28
+M_COUNT = 1
 
 COMPLETED = 0
 TOTAL = 0
@@ -205,13 +205,15 @@ if __name__ == "__main__":
     TOTAL = len(todo)
 
     for input_file in todo:
-        T_COUNT += 1
-        while T_COUNT >= M_COUNT:
-            time.sleep(0.1)
-        threading.Thread(target=convert_flac_to_flac16, args=(input_file, output_root)).start()
+        convert_flac_to_flac16(input_file, output_root)
 
-    while T_COUNT > 0:
-        time.sleep(0.1)
+    #     T_COUNT += 1
+    #     while T_COUNT >= M_COUNT:
+    #         time.sleep(0.1)
+    #     threading.Thread(target=convert_flac_to_flac16, args=(input_file, output_root)).start()
+
+    # while T_COUNT > 0:
+    #     time.sleep(0.1)
 
     os.system("stty sane")
 
