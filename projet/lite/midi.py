@@ -10,7 +10,27 @@ port = mido.open_output()
 global is_space_pressed
 is_space_pressed = False
 
-KEYSYM_TO_NOTE_RANK_2 = {
+KEYSYM_TO_NOTE = {
+    60: 47,   # < -> B2
+    119: 48,  # w -> C3
+    115: 49,  # s -> C#3
+    120: 50,  # x -> D3
+    100: 51,  # d -> D#3
+    99: 52,   # c -> E3
+    118: 53,  # v -> F3
+    103: 54,  # g -> F#3
+    98: 55,   # b -> G3
+    104: 56,  # h -> G#3
+    110: 57,  # n -> A3
+    106: 58,  # j -> A#3
+    44: 59,   # , -> B3
+    59: 60,   # ; -> C4
+    108: 61,  # l -> C#4
+    58: 62,   # : -> D4
+    109: 63,  # m -> D#4
+    33: 64,   # ! -> E4
+    42: 66,   # * -> F#4
+
     97: 60,   # a -> C4
     233: 61,  # é -> C#4
     122: 62,  # z -> D4
@@ -33,37 +53,14 @@ KEYSYM_TO_NOTE_RANK_2 = {
     36: 79,   # $ -> G5
 }
 
-KEYSYM_TO_NOTE_RANK_1 = {
-    60: 47,  # < -> B2
-    119: 48,  # w -> C3
-    115: 49,  # s -> C#3
-    120: 50,  # x -> D3
-    100: 51,  # d -> D#3
-    99: 52,  # c -> E3
-    118: 53,  # v -> F3
-    103: 54,  # g -> F#3
-    98: 55,  # b -> G3
-    104: 56,  # h -> G#3
-    110: 57,  # n -> A3
-    106: 58,  # j -> A#3
-    44: 59,  # , -> B3
-    59: 60,  # ; -> C4
-    108: 61,  # l -> C#4
-    58: 62,  # : -> D4
-    109: 63,  # m -> D#4
-    33: 64,  # ! -> E4
-    42: 66,  # * -> F#4
-}
+VELOCITY = 127
 
 def get_note_from_keycode(keycode):
     if keycode == 0:
         return 0
 
-    if keycode in KEYSYM_TO_NOTE_RANK_2:
-        return KEYSYM_TO_NOTE_RANK_2[keycode]
-
-    if keycode in KEYSYM_TO_NOTE_RANK_1:
-        return KEYSYM_TO_NOTE_RANK_1[keycode]
+    if keycode in KEYSYM_TO_NOTE:
+        return KEYSYM_TO_NOTE[keycode]
 
     return -1
 
@@ -76,17 +73,17 @@ def key_press(keycode):
     if note == 0:
         global is_space_pressed
         if is_space_pressed:
-            msg = mido.Message('note_off', note=note, velocity=64)
+            msg = mido.Message('note_off', note=note, velocity=VELOCITY)
             port.send(msg)
             is_space_pressed = False
         else:
-            msg = mido.Message('note_on', note=note, velocity=64)
+            msg = mido.Message('note_on', note=note, velocity=VELOCITY)
             port.send(msg)
             is_space_pressed = True
         return
 
     # create a new note on message
-    msg = mido.Message('note_on', note=note, velocity=64)
+    msg = mido.Message('note_on', note=note, velocity=VELOCITY)
     # send the message to the midi port
     port.send(msg)
 
