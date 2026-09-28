@@ -19,6 +19,7 @@
 #define WORD_INST_STOP  8
 #define WORD_INST_LET   9
 #define WORD_INST_LEN   10
+#define WORD_INST_THEN  11
 
 
 #define VAARG_FUNC 10
@@ -51,10 +52,23 @@ typedef struct {
 variable_t *g_var_tail = NULL;
 
 
-int tok_end(char *str, int length, char delimiter) {
+int tok_end(char *str, int length) {
     int i = 0;
-    while (i < length && str[i] && str[i] != delimiter)
+    int in_quotes = 0;
+    while (i < length && str[i] && (str[i] != ' ' || in_quotes) && str[i] != '\n') {
+        if (str[i] == '"') {
+            in_quotes = !in_quotes;
+        }
         i++;
+    }
+    return i;
+}
+
+int line_end(char *str, int length) {
+    int i = 0;
+    while (i < length && str[i] && str[i] != '\n') {
+        i++;
+    }
     return i;
 }
 
@@ -134,7 +148,9 @@ word_t *parse_str(char *str, int length, word_t *word) {
         length--;
     }
 
-    int end = tok_end(str, length, ' ');
+    printf("Parsing: %.*s\n", length, str);
+
+    int end = tok_end(str, length);
 
     if (end == 0) {
         printf("Error: empty instruction\n");
@@ -172,13 +188,16 @@ word_t *parse_str(char *str, int length, word_t *word) {
         expected_args = 1;
     } else if (strncmp(str, "IF", end) == 0) {
         type = WORD_INST_IF;
-        expected_args = 1;
+        expected_args = 2;
     } else if (strncmp(str, "STOP", end) == 0) {
         type = WORD_INST_STOP;
         expected_args = 0;
     } else if (strncmp(str, "LEN", end) == 0) {
         type = WORD_INST_LEN;
         expected_args = 1;
+    } else if (strncmp(str, "THEN", end) == 0) {
+        type = WORD_INST_THEN;
+        expected_args = VAARG_FUNC;
     } else {
         int debut = end;
         while (debut < length && str[debut] == ' ') {
@@ -270,20 +289,24 @@ word_t *parse_str(char *str, int length, word_t *word) {
                 free(to_free);
                 return NULL;
             }
-            printf("Found parentheses: %.*s\n", end, str);
         } else {
-            end = tok_end(str, length, ' ');
+            end = tok_end(str, length);
         }
 
         word_t *arg;
         if (have_parentheses) {
             arg = parse_str(str, end, word->inst_args + argc);
-        } else if (expected_args == argc + 1 || expected_args >= VAARG_FUNC) {
-            arg = parse_str(str, length, word->inst_args + argc);
         } else {
-            printf("Error: not enough arguments (after sub instruction)\n");
-            free(to_free);
-            return NULL;
+            arg = parse_str(str, length, word->inst_args + argc);
+            printf("type: %d\n", arg->type);
+            if (arg && arg->type >= WORD_FIRST_INST) {
+                if (expected_args != argc + 1 && expected_args < VAARG_FUNC) {
+                    printf("Error: wrong number of arguments %d, expected %d\n", argc + 1, expected_args);
+                    free(to_free);
+                    return NULL;
+                }
+                end = length;
+            }
         }
 
         if (!arg) {
@@ -302,8 +325,6 @@ word_t *parse_str(char *str, int length, word_t *word) {
         str++;
         length--;
     }
-
-    printf("Remaining length: %d (%.*s)\n", length, length, str);
 
     if (length == 0) {
         return word;
@@ -350,6 +371,9 @@ void print_word(word_t *word) {
         case WORD_INST_LEN:
             printf("LEN ");
             break;
+        case WORD_INST_THEN:
+            printf("THEN ");
+            break;
         default:
             printf("[type: %d] ", word->type);
             break;
@@ -389,7 +413,7 @@ int execute_word(word_t *word, word_t *return_value) {
             }
         } else if (word->inst_args[argc].type < WORD_FIRST_INST) {
             args[argc] = word->inst_args[argc];
-        } else {
+        } else if (word->type != WORD_INST_IF || argc != 1) {
             if (execute_word(word->inst_args + argc, args + argc) != 0) {
                 return 1;
             }
@@ -448,6 +472,16 @@ int execute_word(word_t *word, word_t *return_value) {
                 return 1;
             }
             break;
+        case WORD_INST_THEN:
+            // arguments are already executed, nothing to do here
+            break;
+        case WORD_INST_IF:
+            if ((args[0].type == WORD_NUM && args[0].num) || (args[0].type == WORD_STR && args[0].str[0])) {
+                if (execute_word(word->inst_args + 1, NULL) != 0) {
+                    return 1;
+                }
+            }
+            break;
         default:
             printf("Error: unknown instruction type: %d\n", word->type);
             return 1;
@@ -470,25 +504,23 @@ void free_variable_list(variable_t *var) {
 int main(void) {
     /*char *program =
             "age = INPUT \"age\"\n"
-            "IF age < 18 THEN GOTO 1\n"
+            "IF age < 18 GOTO 1\n"
             "PRINT \"You are an adult.\"\n"
             "STOP\n"
             "(1) PRINT \"You are a minor.\"\n";*/
 
     char *program =
             "coucou = \"hi!\"\n"
-            "PRINT \"Hello\" (LEN \"oui\") coucou\n";
-            // "age = INPUT \"age\"\n"
-            // "PRINT \"coucou\"\n";
+            "PRINT \"Hello\" (LEN \"oui\") coucou\n"
+            "PRINT 1 LEN \"hi\"\n"
+            "IF 1 THEN (PRINT \"if is true\") (PRINT 123)\n";
 
     // split program into lines
     word_t *lines[10];
     int line_count = 0;
 
     while (*program) {
-        printf("Parsing line: %d\n", line_count + 1);
-    
-        int end = tok_end(program, strlen(program), '\n');
+        int end = line_end(program, strlen(program));
         if (end == 0) {
             break;
         }
