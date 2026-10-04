@@ -54,9 +54,27 @@ typedef struct {
     word_t *lines;
 } program_t;
 
+typedef struct {
+    int type;
+    char *name;
+    int argc;
+} instruction_t;
+
 variable_t *g_var_tail = NULL;
 int goto_table[100] = {0xFFFF};
 
+instruction_t instructions[] = {
+    {WORD_INST_INPUT, "INPUT", 1},
+    {WORD_INST_PRINT, "PRINT", VAARG_FUNC},
+    {WORD_INST_GOTO,  "GOTO",  1},
+    {WORD_INST_IF,    "IF",    2},
+    {WORD_INST_STOP,  "STOP",  0},
+    {WORD_INST_LET,   "LET",   2},
+    {WORD_INST_LEN,   "LEN",   1},
+    {WORD_INST_THEN,  "THEN",  VAARG_FUNC},
+    {WORD_INST_LT,    "<",     2},
+    {WORD_INST_PLUS,  "+",     2},
+};
 
 int tok_end(char *str, int length) {
     int i = 0;
@@ -225,35 +243,16 @@ word_t *parse_str(char *str, int length, word_t *word) {
 
     word_t preloaded_word;
     preloaded_word.type = WORD_NONE;
+    
+    for (unsigned i = 0; i < sizeof(instructions) / sizeof(instruction_t); i++) {
+        if (strncmp(str, instructions[i].name, end) == 0) {
+            type = instructions[i].type;
+            expected_args = instructions[i].argc;
+            break;
+        }
+    }
 
-    if (strncmp(str, "INPUT", end) == 0) {
-        type = WORD_INST_INPUT;
-        expected_args = 1;
-    } else if (strncmp(str, "PRINT", end) == 0) {
-        type = WORD_INST_PRINT;
-        expected_args = VAARG_FUNC;
-    } else if (strncmp(str, "GOTO", end) == 0) {
-        type = WORD_INST_GOTO;
-        expected_args = 1;
-    } else if (strncmp(str, "IF", end) == 0) {
-        type = WORD_INST_IF;
-        expected_args = 2;
-    } else if (strncmp(str, "STOP", end) == 0) {
-        type = WORD_INST_STOP;
-        expected_args = 0;
-    } else if (strncmp(str, "LEN", end) == 0) {
-        type = WORD_INST_LEN;
-        expected_args = 1;
-    } else if (strncmp(str, "THEN", end) == 0) {
-        type = WORD_INST_THEN;
-        expected_args = VAARG_FUNC;
-    } else if (strncmp(str, "<", end) == 0) {
-        type = WORD_INST_LT;
-        expected_args = 2;
-    } else if (strncmp(str, "+", end) == 0) {
-        type = WORD_INST_PLUS;
-        expected_args = 2;
-    } else {
+    if (type == 0) {
         int debut = end;
         while (debut < length && str[debut] == ' ') {
             debut++;
@@ -380,6 +379,9 @@ void print_word(word_t *word) {
         printf("( ");
 
     switch (word->type) {
+        case WORD_NONE:
+            printf("None ");
+            break;
         case WORD_VAR:
             printf("%s ", word->var_ptr->name);
             break;
@@ -389,37 +391,13 @@ void print_word(word_t *word) {
         case WORD_NUM:
             printf("%d ", word->num);
             break;
-        case WORD_INST_INPUT:
-            printf("INPUT ");
-            break;
-        case WORD_INST_PRINT:
-            printf("PRINT ");
-            break;
-        case WORD_INST_GOTO:
-            printf("GOTO ");
-            break;
-        case WORD_INST_IF:
-            printf("IF ");
-            break;
-        case WORD_INST_STOP:
-            printf("STOP");
-            return;
-        case WORD_INST_LET:
-            printf("LET ");
-            break;
-        case WORD_INST_LEN:
-            printf("LEN ");
-            break;
-        case WORD_INST_THEN:
-            printf("THEN ");
-            break;
-        case WORD_INST_LT:
-            printf("< ");
-            break;
-        case WORD_INST_PLUS:
-            printf("+ ");
-            break;
         default:
+            for (unsigned i = 0; i < sizeof(instructions) / sizeof(instruction_t); i++) {
+                if (instructions[i].type == word->type) {
+                    printf("%s ", instructions[i].name);
+                    break;
+                }
+            } 
             printf("[type: %d] ", word->type);
             break;
     }
