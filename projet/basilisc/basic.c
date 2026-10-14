@@ -21,6 +21,8 @@
 #define WORD_INST_LEN   10
 #define WORD_INST_THEN  11
 
+#define WORD_INST_ADD   12
+
 
 #define VAARG_FUNC 10
 
@@ -159,6 +161,9 @@ word_t *parse_str(char *str, int length, word_t *word) {
 
     int expected_args = 0;
     int type = 0;
+
+    word_t preloaded_word;
+    preloaded_word.type = WORD_NONE;
     
     if (end > 1 && str[0] == '"' && str[end - 1] == '"') {
         if (word == NULL)
@@ -167,17 +172,32 @@ word_t *parse_str(char *str, int length, word_t *word) {
         word->str = strndup(str + 1, end - 2);
         return word;
     } else if (isnumber(str, end)) {
-        if (word == NULL)
-            word = malloc(sizeof(word_t));
-        word->type = WORD_NUM;
-        word->num = atoi(str);
-        return word;
-    }
+        preloaded_word.type = WORD_NUM;
+        preloaded_word.num = atoi(str);
+        while (end < length && str[end] == ' ') {
+            end++;
+        }
+        if (end == length) {
+            if (word == NULL)
+                word = malloc(sizeof(word_t));
+            *word = preloaded_word;
+            return word;
+        }
 
-    word_t preloaded_word;
-    preloaded_word.type = WORD_NONE;
+        printf("op: %c\n", str[end]);
 
-    if (strncmp(str, "INPUT", end) == 0) {
+        // check for operator after number
+        if (strncmp(str + end, "+", 1) == 0) {
+            type = WORD_INST_ADD;
+            expected_args = 2;
+            end++; // skip operator
+        } else {
+            if (word == NULL)
+                word = malloc(sizeof(word_t));
+            *word = preloaded_word;
+            return word;
+        }
+    } else if (strncmp(str, "INPUT", end) == 0) {
         type = WORD_INST_INPUT;
         expected_args = 1;
     } else if (strncmp(str, "PRINT", end) == 0) {
@@ -374,6 +394,9 @@ void print_word(word_t *word) {
         case WORD_INST_THEN:
             printf("THEN ");
             break;
+        case WORD_INST_ADD:
+            printf("ADD ");
+            break;
         default:
             printf("[type: %d] ", word->type);
             break;
@@ -482,6 +505,17 @@ int execute_word(word_t *word, word_t *return_value) {
                 }
             }
             break;
+        case WORD_INST_ADD:
+            if (args[0].type == WORD_NUM && args[1].type == WORD_NUM) {
+                if (return_value) {
+                    return_value->type = WORD_NUM;
+                    return_value->num = args[0].num + args[1].num;
+                }
+            } else {
+                printf("Error: ADD expects two number arguments\n");
+                return 1;
+            }
+            break;
         default:
             printf("Error: unknown instruction type: %d\n", word->type);
             return 1;
@@ -513,7 +547,8 @@ int main(void) {
             "coucou = \"hi!\"\n"
             "PRINT \"Hello\" (LEN \"oui\") coucou\n"
             "PRINT 1 LEN \"hi\"\n"
-            "IF 1 THEN (PRINT \"if is true\") (PRINT 123)\n";
+            "IF 1 THEN (PRINT \"if is true\") (PRINT 123)\n"
+            "PRINT 4 + 2 + 1\n";
 
     // split program into lines
     word_t *lines[10];
