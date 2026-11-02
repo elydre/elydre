@@ -304,7 +304,7 @@ if __name__ == "__main__":
         elif arg == "-d":
             KEEP_DIR = True
         else:
-            print("Usage: python album_formater.py [-r]")
+            print("Usage: python album_formater.py [-d] [-r]")
             sys.exit(1)
 
     recursive_rename_albums(".")
